@@ -55,4 +55,57 @@ public class MovieManager {
             System.out.println("Error: Movie ID not found.");
         }
     }
+    // 3. DELETE MOVIE
+
+    public void deleteMovie(String movieIdToDelete) {
+        List<Movie> allMovies = getAllMovies(); // Get all current movies
+
+        // Remove the movie from our Java List if the ID matches
+        boolean isRemoved = allMovies.removeIf(movie -> movie.getMovieId().equals(movieIdToDelete));
+
+        // If we removed it from the list, overwrite the text file so it is permanently gone
+        if (isRemoved) {
+            rewriteEntireFile(allMovies);
+            System.out.println("Success: Movie deleted!");
+        } else {
+            System.out.println("Error: Movie ID not found.");
+        }
+    }
+
+
+    // Reads all movies from the text file and returns them as a Java List
+    public List<Movie> getAllMovies() {
+        List<Movie> movieList = new ArrayList<>();
+        File file = new File(FILE_PATH);
+        if (!file.exists()) return movieList;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length == 5) {
+                    movieList.add(new Movie(data[0], data[1], data[2], data[3], data[4]));
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading file: " + e.getMessage());
+        }
+        return movieList;
+    }
+
+    // Overwrites the entire text file (used when a movie is deleted or changed)
+    private void rewriteEntireFile(List<Movie> movies) {
+        // "FileWriter(FILE_PATH, false)" means OVERWRITE the file completely
+        try (PrintWriter out = new PrintWriter(new FileWriter(FILE_PATH, false))) {
+            for (Movie movie : movies) {
+                out.println(movie.getMovieId() + "," +
+                        movie.getPoster() + "," +
+                        movie.getSummary() + "," +
+                        movie.getShowtimes() + "," +
+                        movie.getTheaterId());
+            }
+        } catch (IOException e) {
+            System.out.println("Error updating file: " + e.getMessage());
+        }
+    }
 }
