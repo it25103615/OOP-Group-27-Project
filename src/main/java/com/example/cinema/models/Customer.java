@@ -4,10 +4,11 @@ public class Customer extends User{
     protected int phoneNumber ;
     protected String billingAddresses ;
     protected String orderHistory ;
-    protected int creditCard ;
+    protected CreditCard creditCard ;
 
-    public Customer(int phoneNumber, String billingAddresses, String orderHistory, int creditCard) {
-        super();
+    public Customer(String userName, String password, int phoneNumber, String billingAddresses, String orderHistory, CreditCard creditCard) {
+        super(userName, password);
+        this.type = "CUSTOMER";
         this.phoneNumber = phoneNumber;
         this.billingAddresses = billingAddresses;
         this.orderHistory = orderHistory;
@@ -38,11 +39,11 @@ public class Customer extends User{
         this.orderHistory = orderHistory;
     }
 
-    public int getCreditCard() {
+    public CreditCard getCreditCard() {
         return creditCard;
     }
 
-    public void setCreditCard(int creditCard) {
+    public void setCreditCard(CreditCard creditCard) {
         this.creditCard = creditCard;
     }
 }

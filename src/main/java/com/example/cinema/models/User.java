@@ -1,6 +1,15 @@
 package com.example.cinema.models;
 
+import jakarta.persistence.*;
+
+@Entity //Declare that this is an entity to be used in the database
+@Table(name = "users") //Set the table this entity should stored in
+@Inheritance(strategy = InheritanceType.JOINED) //Tell the code to join the tables of classes that extend this class
+@DiscriminatorColumn(name = "role", discriminatorType = DiscriminatorType.STRING) //
 public class User {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected Long id;
+
     protected String userName;
     protected String password;
     protected String type;
@@ -17,9 +26,23 @@ public class User {
         this.type = null;
     }
 
+    //Default User Constructor
+    //  Only here to stop intelliJ from throwing errors
+    //  Should not be used
+    public User() {
+    }
+
     //--- Constructor: End ---
 
     //--- Getters: Start ---
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getUserName() {
         return userName;
