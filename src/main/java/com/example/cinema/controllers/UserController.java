@@ -51,7 +51,7 @@ class UserController {
         String password = body.get("password"); // extract the password from the request body
 
         // Use the user database connection to find the user by using their username
-        return userRepository.findByUsername(username)
+        return userRepository.findByUserName(username)
                 .filter(u -> u.getPassword().equals(password)) //Use "filter" to check if the passwords match
                 //If the passwords match
                 //  In the response entity of OK (HTML code 200: OK)
@@ -59,7 +59,7 @@ class UserController {
                 .map(u -> ResponseEntity.ok(Map.of(
                         "userId", u.getId(),
                         "username", u.getUserName(),
-                        "type", u.getType()
+                        "type", u.getClass().getSimpleName()
                 )))
                 //If the passwords don't match
                 //  In the response entity of 401 (HTML code 401: Unauthorized)

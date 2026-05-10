@@ -3,7 +3,7 @@ package com.example.cinema.models;
 import jakarta.persistence.*;
 
 @Entity //Declare that this is an entity to be used in the database
-@Table(name = "users") //Set the table this entity should stored in
+@Table(name = "users") //Set the table this entity should be stored in
 @Inheritance(strategy = InheritanceType.JOINED) //Tell the code to join the tables of classes that extend this class
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
 public class User {
@@ -12,7 +12,6 @@ public class User {
 
     protected String userName;
     protected String password;
-    protected String type;
 
     //--- Constructor: Start ---
 
@@ -23,7 +22,6 @@ public class User {
     public User(String userName, String password) {
         this.userName = userName;
         this.password = password;
-        this.type = null;
     }
 
     //Default User Constructor
@@ -36,8 +34,8 @@ public class User {
 
     //--- Getters: Start ---
 
-    public Long getId() { 
-      return id; 
+    public Long getId() {
+      return id;
     }
 
     public String getUserName() {
@@ -46,10 +44,6 @@ public class User {
 
     public String getPassword() {
         return password;
-    }
-
-    public String getType() {
-        return type;
     }
 
     //--- Getters: End ---
@@ -61,10 +55,6 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     //--- Setters: End ---
