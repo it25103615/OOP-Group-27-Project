@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 @Entity //Declare that this is an entity to be used in the database
 @Table(name = "users") //Set the table this entity should stored in
 @Inheritance(strategy = InheritanceType.JOINED) //Tell the code to join the tables of classes that extend this class
-@DiscriminatorColumn(name = "role", discriminatorType = DiscriminatorType.STRING) //
+@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
@@ -36,12 +36,8 @@ public class User {
 
     //--- Getters: Start ---
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public Long getId() { 
+      return id; 
     }
 
     public String getUserName() {
