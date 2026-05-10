@@ -8,7 +8,6 @@ public class Customer extends User{
 
     public Customer(String userName, String password, int phoneNumber, String billingAddresses, String orderHistory, CreditCard creditCard) {
         super(userName, password);
-        this.type = "CUSTOMER";
         this.phoneNumber = phoneNumber;
         this.billingAddresses = billingAddresses;
         this.orderHistory = orderHistory;
