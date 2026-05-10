@@ -1,6 +1,16 @@
 package com.example.cinema.models;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "users")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     protected String userName;
     protected String password;
     protected String type;
@@ -17,9 +27,17 @@ public class User {
         this.type = null;
     }
 
+    //Default User Constructor
+    //  Only here to stop intelliJ from throwing errors
+    //  Should not be used
+    public User() {
+    }
+
     //--- Constructor: End ---
 
     //--- Getters: Start ---
+
+    public Long getId() { return id; }
 
     public String getUserName() {
         return userName;
