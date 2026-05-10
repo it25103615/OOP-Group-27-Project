@@ -2,14 +2,13 @@ package com.example.cinema.models;
 
 import jakarta.persistence.*;
 
-@Entity
-@Table(name = "users")
-@Inheritance(strategy = InheritanceType.JOINED)
+@Entity //Declare that this is an entity to be used in the database
+@Table(name = "users") //Set the table this entity should stored in
+@Inheritance(strategy = InheritanceType.JOINED) //Tell the code to join the tables of classes that extend this class
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
 public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected Long id;
 
     protected String userName;
     protected String password;
@@ -37,7 +36,9 @@ public class User {
 
     //--- Getters: Start ---
 
-    public Long getId() { return id; }
+    public Long getId() { 
+      return id; 
+    }
 
     public String getUserName() {
         return userName;
