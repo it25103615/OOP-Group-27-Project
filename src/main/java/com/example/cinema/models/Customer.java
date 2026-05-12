@@ -13,7 +13,7 @@ public class Customer extends User{
     protected int phoneNumber ;
     protected String billingAddresses ;
     protected List<String> orderHistory ;
-    protected CreditCard creditCard ;
+    //protected CreditCard creditCard ;
 
     public Customer(String userName, String password, int phoneNumber, String billingAddresses) {
         super(userName, password);
@@ -52,11 +52,7 @@ public class Customer extends User{
         this.orderHistory.add(orderID);
     }
 
-    public CreditCard getCreditCard() {
-        return creditCard;
-    }
+    //public CreditCard getCreditCard() {return creditCard;}
 
-    public void setCreditCard(CreditCard creditCard) {
-        this.creditCard = creditCard;
-    }
+    //public void setCreditCard(CreditCard creditCard) {this.creditCard = creditCard;}
 }
