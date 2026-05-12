@@ -1,17 +1,31 @@
 package com.example.cinema.models;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+
+import java.util.List;
+
+@Entity
+@Table(name = "customers")
+@DiscriminatorValue("CUSTOMER")
 public class Customer extends User{
     protected int phoneNumber ;
     protected String billingAddresses ;
-    protected String orderHistory ;
-    protected CreditCard creditCard ;
+    protected List<String> orderHistory ;
+    //protected CreditCard creditCard ;
 
-    public Customer(String userName, String password, int phoneNumber, String billingAddresses, String orderHistory, CreditCard creditCard) {
+    public Customer(String userName, String password, int phoneNumber, String billingAddresses) {
         super(userName, password);
         this.phoneNumber = phoneNumber;
         this.billingAddresses = billingAddresses;
-        this.orderHistory = orderHistory;
-        this.creditCard = creditCard;
+    }
+
+    public Customer(String userName, String password) {
+        super(userName, password);
+    }
+
+    public Customer() {
     }
 
     public int getPhoneNumber() {
@@ -30,19 +44,15 @@ public class Customer extends User{
         this.billingAddresses = billingAddresses;
     }
 
-    public String getOrderHistory() {
+    public List<String> getOrderHistory() {
         return orderHistory;
     }
 
-    public void setOrderHistory(String orderHistory) {
-        this.orderHistory = orderHistory;
+    public void addToOrderHistory(String orderID) {
+        this.orderHistory.add(orderID);
     }
 
-    public CreditCard getCreditCard() {
-        return creditCard;
-    }
+    //public CreditCard getCreditCard() {return creditCard;}
 
-    public void setCreditCard(CreditCard creditCard) {
-        this.creditCard = creditCard;
-    }
+    //public void setCreditCard(CreditCard creditCard) {this.creditCard = creditCard;}
 }
