@@ -2,11 +2,13 @@ package com.example.cinema.controllers;
 
 // === Import Models / Classes ===
 import com.example.cinema.models.Admin;
+import com.example.cinema.models.Customer;
 import com.example.cinema.models.User;
 
 // === Import Repositories / Database Tables ===
 import com.example.cinema.repositories.AdminRepository;
 import com.example.cinema.repositories.UserRepository;
+import com.example.cinema.repositories.CustomerRepository;
 
 // === Imports Specific to Controller ===
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ class UserController {
     // @Autowired is a shortcut to declare and initialize the database connection
     @Autowired private UserRepository userRepository; // access to the users table
     @Autowired private AdminRepository adminRepository; // access to the admins table
+    @Autowired private CustomerRepository customerRepository; //access to the customers table
 
     //Get all users
     // Returns a list of ALL the users in the database (i.e. Admins AND Customers)
@@ -65,5 +68,22 @@ class UserController {
                 //  In the response entity of 401 (HTML code 401: Unauthorized)
                 //  Return a map with an error message
                 .orElse(ResponseEntity.status(401).body(Map.of("error", "Invalid credentials")));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody Map<String, String> body){
+        String username = body.get("username");
+        String password = body.get("password");
+
+        if(userRepository.findByUserName(username).isPresent()){
+            return ResponseEntity.badRequest().body(Map.of("error", "Username already exists"));
+        }
+
+        Customer customer = new Customer(username, password);
+        customer.setPhoneNumber(Integer.parseInt(body.getOrDefault("phoneNumber", "")));
+        customer.setBillingAddresses(body.getOrDefault("billingAddress", ""));
+
+        Customer saved = customerRepository.save(customer);
+        return ResponseEntity.ok(Map.of("message", "Registered successfully", "userID", saved.getId()));
     }
 }
