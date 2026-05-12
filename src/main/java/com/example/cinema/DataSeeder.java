@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 class DataSeeder implements CommandLineRunner {
     @Autowired private UserRepository userRepository;
     @Autowired private AdminRepository adminRepository;
+    @Autowired private CustomerRepository customerRepository;
 
     //CommandLineRunner only has one method "run"
     //  Springboot will look for all instances that implement CommandLineRunner and call their run methods
@@ -28,5 +29,8 @@ class DataSeeder implements CommandLineRunner {
         Admin admin = new Admin("admin", "admin123");
         // Save the admin in the database
         adminRepository.save(admin);
+
+        Customer customer = new Customer("John Doe", "jdoe123", 0111231234, "12 Example Street, Sample Town, Test State");
+        customerRepository.save(customer);
     }
 }
