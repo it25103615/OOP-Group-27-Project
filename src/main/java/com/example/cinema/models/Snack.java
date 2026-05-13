@@ -19,7 +19,7 @@ public class Snack {
         this.imagePath = "";
     }
 
-    // Parameterized constructor - initializes snack with given values
+    // Parameterized constructor  initializes snack with given values
     public Snack(String snackId, String name, double price,
                  String category, String imagePath) {
         this.snackId   = snackId;
