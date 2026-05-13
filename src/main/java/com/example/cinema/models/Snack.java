@@ -34,7 +34,7 @@ public class Snack {
         return snackId;
     }
 
-    // Setter for snack ID
+    // Setter for snackID
     public void setSnackId(String snackId) {
         this.snackId = snackId;
     }
