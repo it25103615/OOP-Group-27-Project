@@ -10,7 +10,7 @@ public class Snack {
     private String category;
     private String imagePath;
 
-    // Default constructor - initializes snack with empty values
+    // Default constructor - initializes snack with empty value
     public Snack() {
         this.snackId   = "";
         this.name      = "";
