@@ -79,7 +79,7 @@ public class Snack {
         this.imagePath = imagePath;
     }
 
-    // Returns a string representation of the snack object
+    // Returns  string representation of the snack object
     public String toString() {
         return "Snack{" +
                 "snackId='"    + snackId   + '\'' +
