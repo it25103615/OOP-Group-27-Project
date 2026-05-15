@@ -12,8 +12,7 @@ public class MovieManager {
 
     //     ADD MOVIE
     public void addMovie(Movie movie) {
-        // "FileWriter(FILE_PATH, true)" opens the file in "append" mode
-        // so we add the new movie to the bottom of the list without erasing the old ones.
+
         try (FileWriter fw = new FileWriter(FILE_PATH, true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
@@ -95,7 +94,7 @@ public class MovieManager {
 
     // Overwrites the entire text file (used when a movie is deleted or changed)
     private void rewriteEntireFile(List<Movie> movies) {
-        // "FileWriter(FILE_PATH, false)" means OVERWRITE the file completely
+
         try (PrintWriter out = new PrintWriter(new FileWriter(FILE_PATH, false))) {
             for (Movie movie : movies) {
                 out.println(movie.getMovieId() + "," +
