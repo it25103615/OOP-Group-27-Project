@@ -19,6 +19,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+//Summary Of all API Endpoints in the file:
+//  /api/users - get all the users in the database
+//  /api/users/admins - get all the admin users in the database
+//  /api/users/login - accepts a username and password map and will return a mapping of userId, username or will return a 401 if the user is not in the database
+//  /api/users/register - accepts a username and password map and will return a mapping with a message and the userID or will return a bad request if the user already exists or if the username fails a requirements check (e.g: no spaces)
+//  /api/users/register/admin - accepts a username and password map and will return a mapping with a message and the userID or will return a bad request if the user already exists, if the username fails a requirements check (e.g: no spaces), or if the user trying to make the admin account is not an admin themselves
 
 @RestController //Declare that this is a controller class
 @RequestMapping("/api/users") //Declare how parts of this controller can be accessed
@@ -50,8 +56,8 @@ class UserController {
     //      {"userId": [user ID], "username": [username], "type": [user type]}
     @PostMapping("/login") // /api/users/login
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        String username = body.get("username"); // extract the username from the request body
-        String password = body.get("password"); // extract the password from the request body
+        String username = (body.get("username")).strip(); // extract the username from the request body
+        String password = (body.get("password")).strip(); // extract the password from the request body
 
         // Use the user database connection to find the user by using their username
         return userRepository.findByUserName(username)
@@ -72,18 +78,55 @@ class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, String> body){
-        String username = body.get("username");
-        String password = body.get("password");
+        String username = (body.get("username")).strip();
+        String password = (body.get("password")).strip();
 
         if(userRepository.findByUserName(username).isPresent()){
             return ResponseEntity.badRequest().body(Map.of("error", "Username already exists"));
+        } else if(username.contains(" ")){
+            return ResponseEntity.badRequest().body(Map.of("error", "Username cannot contain spaces"));
         }
 
         Customer customer = new Customer(username, password);
-        customer.setPhoneNumber(Integer.parseInt(body.getOrDefault("phoneNumber", "")));
+
+        String phoneNumber = body.getOrDefault("phoneNumber", "0000000000");
+        if(phoneNumber.isEmpty()){
+            customer.setPhoneNumber(0);
+        } else {
+            customer.setPhoneNumber(Integer.parseInt(phoneNumber));
+        }
+
         customer.setBillingAddresses(body.getOrDefault("billingAddress", ""));
 
         Customer saved = customerRepository.save(customer);
         return ResponseEntity.ok(Map.of("message", "Registered successfully", "userID", saved.getId()));
+    }
+
+    //Create a new Admin User
+    //  Checks if the person making the account is an admin
+    //      If they are then create a new Admin account and save it to the database
+    //      If not then return an error with an appropriate message
+    @PostMapping("/register/admin")
+    public ResponseEntity<?> registerAdmin(@RequestBody Map<String, String> body){
+        String newUserName = (body.get("username")).strip(); // extract the new username from the request body
+        String newPassword = (body.get("password")).strip(); // extract the new password from the request body
+        Long userIDofPersonMakingAdmin = Long.valueOf(body.get("creatorID")); //extract the userId of the person making the admin account
+
+        //Check if the person making the admin account is actually an Admin
+        if(adminRepository.findById(userIDofPersonMakingAdmin).isPresent()){
+            //Check if there are any space in the middle of the username
+            if(newUserName.contains(" ")){
+                //If there is then return an error
+                return ResponseEntity.badRequest().body(Map.of("error", "Username cannot contain spaces"));
+            } else {
+                //If everything is OK then create a new Admin user and save it in the database
+                Admin saved = adminRepository.save(new Admin(newUserName, newPassword));
+                //Once done return a success message as well as the userID of the newly created Admin
+                return ResponseEntity.ok(Map.of("message", "Registered successfully", "userID", saved.getId()));
+            }
+        } else {
+            //If the person trying to make the admin account is not an admin then return an error
+            return ResponseEntity.badRequest().body(Map.of("error", "Need to be an Admin to create Admin users"));
+        }
     }
 }
