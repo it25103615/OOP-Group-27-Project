@@ -1,9 +1,17 @@
 package com.example.cinema.models;
 
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity //Declare that this is an entity to be used in the database
+@Table(name = "Snacks")
 // Snack model class represents a snack item in the cinema
 public class Snack {
 
     // Private attributes for snack details
+    @Id
     private String snackId;
     private String name;
     private double price;
