@@ -2,24 +2,32 @@ package com.example.cinema.services;
 
 import com.example.cinema.models.Snack;
 import com.example.cinema.repositories.SnackRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+@Service
 public class SnackService {
 
-    private SnackRepository snackRepository = new SnackRepository();
+    @Autowired
+    private SnackRepository snackRepository;
 
+    // Returns all snacks from the database
     public List<Snack> getAllSnacks() {
-        return snackRepository.getAllSnacks();
+        return snackRepository.findAll();
     }
 
+    // Returns a snack by ID, or null if not found
     public Snack getSnackById(String snackId) {
         if (snackId == null || snackId.isEmpty()) {
             System.out.println("Invalid Snack ID.");
             return null;
         }
-        Snack snack = snackRepository.getSnackById(snackId);
-        if (snack == null) {
+        Optional<Snack> snack = snackRepository.findById(snackId);
+        if (snack.isEmpty()) {
             System.out.println("Snack not found with ID: " + snackId);
         }
         return snack;
