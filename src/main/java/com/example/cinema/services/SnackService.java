@@ -30,17 +30,19 @@ public class SnackService {
         if (snack.isEmpty()) {
             System.out.println("Snack not found with ID: " + snackId);
         }
-        return snack;
+        return snack.orElse(null);
     }
 
+    // Returns all snacks in a given category
     public List<Snack> getSnacksByCategory(String category) {
         if (category == null || category.isEmpty()) {
             System.out.println("Invalid category.");
             return new ArrayList<>();
         }
-        return snackRepository.getSnacksByCategory(category);
+        return snackRepository.findByCategory(category);
     }
 
+    // Validates and adds a new snack to the database
     public boolean addSnack(String snackId, String name, double price,
                             String category, String imagePath) {
         if (snackId == null || snackId.isEmpty()) {
@@ -59,40 +61,42 @@ public class SnackService {
             System.out.println("Category cannot be empty.");
             return false;
         }
-        Snack newSnack = new Snack(snackId, name, price, category, imagePath);
-        boolean success = snackRepository.addSnack(newSnack);
-        if (success) {
-            System.out.println("Snack added successfully: " + name);
+        // Check if snack with same ID already exists
+        if (snackRepository.existsById(snackId)) {
+            System.out.println("Snack with ID " + snackId + " already exists.");
+            return false;
         }
-        return success;
+        Snack newSnack = new Snack(snackId, name, price, category, imagePath);
+        snackRepository.save(newSnack);
+        System.out.println("Snack added successfully: " + name);
+        return true;
     }
 
+    // Validates and updates an existing snack in the database
     public boolean updateSnack(String snackId, String name, double price,
                                String category, String imagePath) {
-        if (snackRepository.getSnackById(snackId) == null) {
+        if (!snackRepository.existsById(snackId)) {
             System.out.println("Snack not found with ID: " + snackId);
             return false;
         }
         Snack updatedSnack = new Snack(snackId, name, price, category, imagePath);
-        boolean success = snackRepository.updateSnack(snackId, updatedSnack);
-        if (success) {
-            System.out.println("Snack updated successfully: " + name);
-        }
-        return success;
+        snackRepository.save(updatedSnack);
+        System.out.println("Snack updated successfully: " + name);
+        return true;
     }
 
+    // Deletes a snack from the database by ID
     public boolean deleteSnack(String snackId) {
-        if (snackRepository.getSnackById(snackId) == null) {
+        if (!snackRepository.existsById(snackId)) {
             System.out.println("Snack not found with ID: " + snackId);
             return false;
         }
-        boolean success = snackRepository.deleteSnack(snackId);
-        if (success) {
-            System.out.println("Snack deleted successfully with ID: " + snackId);
-        }
-        return success;
+        snackRepository.deleteById(snackId);
+        System.out.println("Snack deleted successfully with ID: " + snackId);
+        return true;
     }
 
+    // Calculates total cost of a list of snacks
     public double calculateTotalSnackCost(List<Snack> selectedSnacks) {
         double total = 0.0;
         for (Snack snack : selectedSnacks) {
