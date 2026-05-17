@@ -30,7 +30,7 @@ class DataSeeder implements CommandLineRunner {
         // Save the admin in the database
         adminRepository.save(admin);
 
-        Customer customer = new Customer("John Doe", "jdoe123", 0111231234, "12 Example Street, Sample Town, Test State");
+        Customer customer = new Customer("JohnDoe", "jdoe123", 0111231234, "12 Example Street, Sample Town, Test State");
         customerRepository.save(customer);
     }
 }

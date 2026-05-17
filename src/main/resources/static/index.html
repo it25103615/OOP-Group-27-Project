@@ -201,7 +201,7 @@
 
     </div>
 </div>
-<!-- Authentication Pop up - Start -->
+<!-- Authentication Pop up - End -->
 
 <script>
     // JavaScript to dynamically fetch and render movies
@@ -229,6 +229,13 @@
             `;
         movieGrid.innerHTML += card;
     });
+
+    let user = {}
+
+    if (sessionStorage.getItem('user')) { //If there already exists a user in session storage
+        user = JSON.parse(sessionStorage.getItem('user')); //Get the data and store in the local variable
+        setAuthenticationButton(user) //Set the login button to the username and adjust the onclick functions
+    }
 
     // Show the authentication Pop Up
     function login(){
@@ -278,20 +285,30 @@
         const data = await res.json(); //Save the returned data to a variable
 
         if (res.ok) {
+            //Assign the returned data to a variable
+            user = data;
+
+            //Save the data so that the user information persists between webpages
+            sessionStorage.setItem('user', JSON.stringify(user));
+
             //If the API call returned an OK
             document.getElementById('authentication-popup').classList.add('hidden');
-            document.getElementById('login-button').textContent = data.username; //Set the text of the authentication button to be the username
-            if(data.type === "Admin"){
-                //If the user type is "Admin"
-                document.getElementById('login-button').onclick = toggleAdminDropdown; //Set the login button function to be the admin dropdown toggle
-            } else {
-                //Otherwise
-                document.getElementById('login-button').onclick = toggleDropdown; //Set the login button function to be the customer dropdown toggle
-            }
+            setAuthenticationButton(data);
         } else {
             //If the API call did not return an OK
             err.textContent = data.error; //Set an error message
             err.classList.remove('hidden'); //Make the tag visible
+        }
+    }
+
+    function setAuthenticationButton(data) {
+        document.getElementById('login-button').textContent = data.username; //Set the text of the authentication button to be the username
+        if(data.type === "Admin"){
+            //If the user type is "Admin"
+            document.getElementById('login-button').onclick = toggleAdminDropdown; //Set the login button function to be the admin dropdown toggle
+        } else {
+            //Otherwise
+            document.getElementById('login-button').onclick = toggleDropdown; //Set the login button function to be the customer dropdown toggle
         }
     }
 
@@ -330,7 +347,7 @@
             //If the API returned an OK then
             closeLogin(); //Close the authentication pop up
 
-            // Auto sign in after registration — switch to sign-in tab with a success hint
+            // switch to sign-in tab with a success hint
             login();
             document.getElementById('login-username').value = username; //Autofill the username field
             //Reuse the error message tag to tell the user the account was made successfully
@@ -347,6 +364,8 @@
 
     //Sign the user out of their session
     function signOut() {
+        sessionStorage.removeItem('user'); //Delete the saved user from session storage so that the data doesn't persist between web pages
+
         document.getElementById('login-button').textContent = 'Login'; //Reset the text of the authentication button to "Login"
         document.getElementById('login-button').onclick = login; // Set the onclick function to be the login function
 
@@ -361,6 +380,8 @@
     //Make the authentication pop up hidden and clear input fields
     function closeLogin() {
         document.getElementById('authentication-popup').classList.add('hidden'); //Set the pop up to hidden
+        document.getElementById('login-error').classList.add('hidden') //Set the login error message to hidden
+        document.getElementById('signup-error').classList.add('hidden') //Set the sign-up error message to hidden
 
         //Clear the input fields in the login tab
         document.getElementById('login-username').value = '';
@@ -371,8 +392,9 @@
         document.getElementById('signup-password').value = '';
         document.getElementById('signup-confirm').value = '';
 
+        //Clear the error message fields
         document.getElementById('login-error').value = '';
-        document.getElementById('signup-error').value = "";
+        document.getElementById('signup-error').value = '';
     }
 
     //Function to toggle the visibility of the customer dropdown
@@ -384,6 +406,24 @@
     function toggleAdminDropdown() {
         document.getElementById('admin-dropdown').classList.toggle('hidden');
     }
+
+    // === Event Listeners - Start ===
+    //	Monitoring for certain actions done by the user such as clicking somewhere or pressing a certain keyboard key
+
+    // Event Listener for pressing Enter to submit
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            if(!document.getElementById('form-signin').classList.contains('hidden')){submitLogin();}
+            if(!document.getElementById('form-signup').classList.contains('hidden')) {submitSignup();}
+        }
+    });
+
+    // Close authentication popup on backdrop click
+    document.getElementById('authentication-popup').addEventListener('click', function(e) {
+        if (e.target === this) closeLogin();
+    });
+
+    // === Event Listeners - Start ===
 </script>
 </body>
 </html>

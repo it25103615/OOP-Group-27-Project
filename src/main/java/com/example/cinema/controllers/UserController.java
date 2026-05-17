@@ -25,6 +25,7 @@ import java.util.Map;
 //  /api/users/login - accepts a username and password map and will return a mapping of userId, username or will return a 401 if the user is not in the database
 //  /api/users/register - accepts a username and password map and will return a mapping with a message and the userID or will return a bad request if the user already exists or if the username fails a requirements check (e.g: no spaces)
 //  /api/users/register/admin - accepts a username and password map and will return a mapping with a message and the userID or will return a bad request if the user already exists, if the username fails a requirements check (e.g: no spaces), or if the user trying to make the admin account is not an admin themselves
+//  /api/users/delete - accepts a user ID and will return a message if the user was successfully deleted or an error message if there was an issue
 
 @RestController //Declare that this is a controller class
 @RequestMapping("/api/users") //Declare how parts of this controller can be accessed
@@ -60,14 +61,14 @@ class UserController {
         String password = (body.get("password")).strip(); // extract the password from the request body
 
         // Use the user database connection to find the user by using their username
-        return userRepository.findByUserName(username)
+        return userRepository.findByUsername(username)
                 .filter(u -> u.getPassword().equals(password)) //Use "filter" to check if the passwords match
                 //If the passwords match
                 //  In the response entity of OK (HTML code 200: OK)
                 //  Return a map with user ID, username and user type (CUSTOMER or ADMIN)
                 .map(u -> ResponseEntity.ok(Map.of(
                         "userId", u.getId(),
-                        "username", u.getUserName(),
+                        "username", u.getUsername(),
                         "type", u.getClass().getSimpleName()
                 )))
                 //If the passwords don't match
@@ -81,7 +82,7 @@ class UserController {
         String username = (body.get("username")).strip();
         String password = (body.get("password")).strip();
 
-        if(userRepository.findByUserName(username).isPresent()){
+        if(userRepository.findByUsername(username).isPresent()){
             return ResponseEntity.badRequest().body(Map.of("error", "Username already exists"));
         } else if(username.contains(" ")){
             return ResponseEntity.badRequest().body(Map.of("error", "Username cannot contain spaces"));
@@ -128,5 +129,15 @@ class UserController {
             //If the person trying to make the admin account is not an admin then return an error
             return ResponseEntity.badRequest().body(Map.of("error", "Need to be an Admin to create Admin users"));
         }
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteUser(@RequestBody Map<String, String> body) {
+        Long id = Long.valueOf(body.get("userID"));
+        if (!userRepository.existsById(id)) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+        userRepository.deleteById(id);
+        return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
     }
 }
