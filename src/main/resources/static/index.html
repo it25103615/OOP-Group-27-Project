@@ -40,7 +40,7 @@
         <a href="#" class="hover:text-brand transition">Movies</a>
         <a href="#" class="hover:text-brand transition">Theaters</a>
         <a href="#" class="hover:text-brand transition">Releases</a>
-        <a href="#" onclick="handleSnacksClick(event)" class="hover:text-brand transition">Snacks</a>
+        <a href="/snacks-user.html" class="hover:text-brand transition">Snacks</a>
 
     </div>
     <div class="flex items-center space-x-6">
@@ -162,6 +162,7 @@
     </div>
 </div>
 
+<script src="/js/auth.js"></script>
 <script>
     // JavaScript to dynamically fetch and render movies
     const movies = [
@@ -197,24 +198,31 @@
         const username = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
 
-        const res = await fetch('/api/users/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
+        const result = await AuthService.login(username, password);
 
-        const data = await res.json();
-
-        if (res.ok) {
-            document.getElementById('login-popup').classList.add('hidden');
-            document.getElementById('login-button').textContent = data.username;
-            if(data.type === "Admin"){
-                document.getElementById('login-button').onclick = toggleAdminDropdown;
-            } else {
-                document.getElementById('login-button').onclick = toggleDropdown;
-            }
+        if (result.ok) {
+            closeLogin();
+            applyLoggedInUI(result.user);
         } else {
-            alert(data.error);
+            alert(result.error);
+        }
+    }
+
+    /** Sync nav button with sessionStorage (shared with snacks checkout). */
+    function applyLoggedInUI(user) {
+        const loginBtn = document.getElementById('login-button');
+        loginBtn.textContent = user.username;
+        if (user.type === 'Admin') {
+            loginBtn.onclick = toggleAdminDropdown;
+        } else {
+            loginBtn.onclick = toggleDropdown;
+        }
+    }
+
+    function restoreSessionUI() {
+        const user = AuthService.getCurrentUser();
+        if (user) {
+            applyLoggedInUI(user);
         }
     }
 
@@ -227,11 +235,12 @@
     }
 
     function signOut() {
+        AuthService.clearSession();
         document.getElementById('login-button').textContent = 'Login';
         document.getElementById('login-button').onclick = login;
         document.getElementById('user-dropdown').classList.add('hidden');
         document.getElementById('admin-dropdown').classList.add('hidden');
-        closeLogin()
+        closeLogin();
     }
 
     function closeLogin() {
@@ -276,16 +285,7 @@
             </div>
         `).join('');
     }
-    function handleSnacksClick(event) {
-        event.preventDefault();
-        const isLoggedIn = document.getElementById('login-button').textContent !== 'Login';
-        if (isLoggedIn) {
-            window.location.href = '/snacks-user.html';
-        } else {
-            document.getElementById('login-popup').classList.remove('hidden');
-            document.getElementById('login-username').placeholder = '🍿 Login to view snacks!';
-        }
-    }
+    document.addEventListener('DOMContentLoaded', restoreSessionUI);
 
 </script>
 </body>
