@@ -42,8 +42,8 @@
             </svg>
             <span id="cart-count"
                   class="hidden absolute -top-2 -right-2 bg-brand text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-        0
-      </span>
+                0
+            </span>
         </button>
         <a href="/index.html" class="bg-white/10 hover:bg-white/20 px-6 py-2 rounded-full font-semibold transition">
             ← Back
@@ -115,11 +115,58 @@
 <!-- Cart Overlay -->
 <div id="cart-overlay" class="hidden fixed inset-0 bg-black/50 z-40" onclick="toggleCart()"></div>
 
-<!-- ── CHECKOUT SUCCESS POPUP ──────────────────────────────────── -->
+<!-- ── LOGIN POPUP (shown at checkout if not logged in) ────────── -->
+<div id="login-popup" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div class="bg-cardbg rounded-2xl shadow-xl p-8 w-full max-w-sm mx-4">
+
+        <div class="text-center mb-6">
+            <div class="text-4xl mb-2">🔒</div>
+            <h2 class="text-xl font-bold text-white">Login to Complete Order</h2>
+            <p class="text-gray-400 text-sm mt-1">Sign in to place your snack order</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="login-error"
+             class="hidden bg-red-500/20 border border-red-500/50 text-red-400 text-sm rounded-lg px-4 py-2 mb-4 text-center">
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Username</label>
+                <input type="text" id="checkout-username" placeholder="Enter your username"
+                       class="w-full bg-darkbg border border-white/20 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-brand" />
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Password</label>
+                <input type="password" id="checkout-password" placeholder="Enter your password"
+                       class="w-full bg-darkbg border border-white/20 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-brand" />
+            </div>
+        </div>
+
+        <div class="mt-6 flex gap-3">
+            <button onclick="submitCheckoutLogin()"
+                    class="flex-1 bg-brand hover:bg-pink-600 text-white rounded-full py-3 text-sm font-bold transition">
+                Login & Order 🍿
+            </button>
+            <button onclick="closeLoginPopup()"
+                    class="flex-1 bg-white/10 hover:bg-white/20 rounded-full py-3 text-sm font-semibold transition">
+                Cancel
+            </button>
+        </div>
+
+        <div class="mt-4 text-center text-sm text-gray-500">
+            Don't have an account?
+            <a href="/register.html" class="text-brand hover:text-pink-400 font-semibold">Register here</a>
+        </div>
+    </div>
+</div>
+
+<!-- ── ORDER SUCCESS POPUP ─────────────────────────────────────── -->
 <div id="checkout-popup" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
     <div class="bg-cardbg rounded-2xl p-8 w-full max-w-sm mx-4 text-center">
         <div class="text-5xl mb-4">🎉</div>
         <h2 class="text-2xl font-bold mb-2">Order Placed!</h2>
+        <p id="order-username" class="text-brand font-semibold mb-1"></p>
         <p class="text-gray-400 mb-6">Your snacks will be ready at the counter. Enjoy the show!</p>
         <button onclick="closeCheckout()"
                 class="w-full bg-brand hover:bg-pink-600 py-3 rounded-full font-bold transition">
@@ -154,9 +201,6 @@
         'ice cream cup': 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=500&q=80',
         'brownie':       'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&q=80',
         'caramel apple': 'https://media.istockphoto.com/id/174921418/photo/group-of-caramel-apples-covered-with-nut-pieces.webp?a=1&b=1&s=612x612&w=0&k=20&c=1v58OkF71nR0Bbg0lT4oBogtay885fyyT_Mf1d2DvF4=',
-
-
-
     };
 
     const categoryDefaults = {
@@ -194,18 +238,18 @@
         snacks.forEach(snack => {
             const imageUrl = getSnackImage(snack.name, snack.category);
             grid.innerHTML += `
-        <div class="bg-cardbg rounded-2xl p-4 flex flex-col transition hover:-translate-y-1 hover:shadow-lg hover:shadow-brand/20">
-          <img src="${imageUrl}" alt="${snack.name}"
-               class="rounded-xl h-48 object-cover w-full mb-4"
-               onerror="this.src='https://images.unsplash.com/photo-1585647347483-22b66260dfff?w=500&q=80'">
-          <span class="text-xs text-brand font-semibold uppercase tracking-wider mb-1">${snack.category}</span>
-          <h3 class="text-lg font-bold mb-1">${snack.name}</h3>
-          <p class="text-brand font-bold text-lg mb-4">Rs. ${snack.price.toFixed(2)}</p>
-          <button onclick='addToCart(${JSON.stringify(snack)})'
-                  class="mt-auto w-full bg-brand hover:bg-pink-600 py-2 rounded-full font-semibold transition text-sm">
-            🛒 Add to Cart
-          </button>
-        </div>`;
+                <div class="bg-cardbg rounded-2xl p-4 flex flex-col transition hover:-translate-y-1 hover:shadow-lg hover:shadow-brand/20">
+                    <img src="${imageUrl}" alt="${snack.name}"
+                         class="rounded-xl h-48 object-cover w-full mb-4"
+                         onerror="this.src='https://images.unsplash.com/photo-1585647347483-22b66260dfff?w=500&q=80'">
+                    <span class="text-xs text-brand font-semibold uppercase tracking-wider mb-1">${snack.category}</span>
+                    <h3 class="text-lg font-bold mb-1">${snack.name}</h3>
+                    <p class="text-brand font-bold text-lg mb-4">Rs. ${snack.price.toFixed(2)}</p>
+                    <button onclick='addToCart(${JSON.stringify(snack)})'
+                            class="mt-auto w-full bg-brand hover:bg-pink-600 py-2 rounded-full font-semibold transition text-sm">
+                        🛒 Add to Cart
+                    </button>
+                </div>`;
         });
     }
 
@@ -237,7 +281,7 @@
 
     function updateCartUI() {
         const items = Object.values(cart);
-        const totalQty = items.reduce((sum, i) => sum + i.qty, 0);
+        const totalQty   = items.reduce((sum, i) => sum + i.qty, 0);
         const totalPrice = items.reduce((sum, i) => sum + i.snack.price * i.qty, 0);
 
         const badge = document.getElementById('cart-count');
@@ -255,24 +299,24 @@
         } else {
             cartEmptyEl.classList.add('hidden');
             cartItemsEl.innerHTML = items.map(({ snack, qty }) => `
-        <div class="flex items-center gap-3 bg-darkbg rounded-xl p-3">
-          <img src="${getSnackImage(snack.name, snack.category)}"
-               class="w-14 h-14 rounded-lg object-cover"
-               onerror="this.src='https://images.unsplash.com/photo-1585647347483-22b66260dfff?w=500&q=80'">
-          <div class="flex-1 min-w-0">
-            <p class="font-semibold text-sm truncate">${snack.name}</p>
-            <p class="text-brand text-sm font-bold">Rs. ${(snack.price * qty).toFixed(2)}</p>
-          </div>
-          <div class="flex items-center gap-1">
-            <button onclick="changeQty('${snack.snackId}', -1)"
-                    class="w-7 h-7 bg-white/10 hover:bg-white/20 rounded-full text-sm font-bold">−</button>
-            <span class="w-6 text-center text-sm font-bold">${qty}</span>
-            <button onclick="changeQty('${snack.snackId}', 1)"
-                    class="w-7 h-7 bg-white/10 hover:bg-white/20 rounded-full text-sm font-bold">+</button>
-            <button onclick="removeFromCart('${snack.snackId}')"
-                    class="ml-1 w-7 h-7 bg-brand/20 hover:bg-brand/40 rounded-full text-brand text-sm font-bold">✕</button>
-          </div>
-        </div>`).join('');
+                <div class="flex items-center gap-3 bg-darkbg rounded-xl p-3">
+                    <img src="${getSnackImage(snack.name, snack.category)}"
+                         class="w-14 h-14 rounded-lg object-cover"
+                         onerror="this.src='https://images.unsplash.com/photo-1585647347483-22b66260dfff?w=500&q=80'">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-sm truncate">${snack.name}</p>
+                        <p class="text-brand text-sm font-bold">Rs. ${(snack.price * qty).toFixed(2)}</p>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="changeQty('${snack.snackId}', -1)"
+                                class="w-7 h-7 bg-white/10 hover:bg-white/20 rounded-full text-sm font-bold">−</button>
+                        <span class="w-6 text-center text-sm font-bold">${qty}</span>
+                        <button onclick="changeQty('${snack.snackId}', 1)"
+                                class="w-7 h-7 bg-white/10 hover:bg-white/20 rounded-full text-sm font-bold">+</button>
+                        <button onclick="removeFromCart('${snack.snackId}')"
+                                class="ml-1 w-7 h-7 bg-brand/20 hover:bg-brand/40 rounded-full text-brand text-sm font-bold">✕</button>
+                    </div>
+                </div>`).join('');
         }
     }
 
@@ -281,9 +325,73 @@
         document.getElementById('cart-overlay').classList.toggle('hidden');
     }
 
+    // ── CHECKOUT: check login first ────────────────────────────────
     function checkout() {
         if (Object.keys(cart).length === 0) return;
-        toggleCart();
+
+        const raw = sessionStorage.getItem('loggedInUser');
+
+        if (!raw) {
+            // ── Not logged in → close cart → show login popup ──
+            document.getElementById('cart-sidebar').classList.add('hidden');
+            document.getElementById('cart-overlay').classList.add('hidden');
+            document.getElementById('login-popup').classList.remove('hidden');
+            return;
+        }
+
+        // ── Already logged in → place order directly ──
+        const user = JSON.parse(raw);
+        placeOrder(user.username);
+    }
+    // ── LOGIN POPUP at checkout ────────────────────────────────────
+    async function submitCheckoutLogin() {
+        const username = document.getElementById('checkout-username').value.trim();
+        const password = document.getElementById('checkout-password').value.trim();
+        const errorEl  = document.getElementById('login-error');
+
+        if (!username || !password) {
+            errorEl.textContent = '⚠️ Please enter username and password.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        try {
+            const res  = await fetch('/api/users/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                // Save to sessionStorage
+                sessionStorage.setItem('loggedInUser', JSON.stringify({
+                    userId:   data.userId,
+                    username: data.username,
+                    type:     data.type
+                }));
+                closeLoginPopup();
+                placeOrder(data.username);
+            } else {
+                errorEl.textContent = '❌ Invalid username or password.';
+                errorEl.classList.remove('hidden');
+            }
+        } catch (err) {
+            errorEl.textContent = '❌ Something went wrong. Please try again.';
+            errorEl.classList.remove('hidden');
+        }
+    }
+
+    function closeLoginPopup() {
+        document.getElementById('login-popup').classList.add('hidden');
+        document.getElementById('checkout-username').value = '';
+        document.getElementById('checkout-password').value = '';
+        document.getElementById('login-error').classList.add('hidden');
+    }
+
+    // ── Place order and show success ───────────────────────────────
+    function placeOrder(username) {
+        document.getElementById('order-username').textContent = '👋 ' + username + ', your order is confirmed!';
         document.getElementById('checkout-popup').classList.remove('hidden');
         clearCart();
     }
@@ -291,6 +399,14 @@
     function closeCheckout() {
         document.getElementById('checkout-popup').classList.add('hidden');
     }
+
+    // Allow Enter key in login popup
+    document.addEventListener('keypress', function(e) {
+        const popup = document.getElementById('login-popup');
+        if (e.key === 'Enter' && !popup.classList.contains('hidden')) {
+            submitCheckoutLogin();
+        }
+    });
 
     loadSnacks();
 </script>
