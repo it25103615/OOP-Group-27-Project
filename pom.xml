@@ -65,6 +65,11 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	// thymeleaf dependenci
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-thymeleaf</artifactId>
+	</dependency>
 
 	<build>
 		<plugins>
