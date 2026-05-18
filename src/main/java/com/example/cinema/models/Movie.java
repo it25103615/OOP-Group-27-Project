@@ -1,8 +1,15 @@
 package com.example.cinema.models;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity  //database create for attribute
+@Table(name = "movie") //uniq name table create
 public class Movie {
 
     // Private attributes (Encapsulation)
+    @Id
     private String movieId;
     private String poster; // Stores the image path or URL
     private String summary;
