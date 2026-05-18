@@ -31,9 +31,13 @@
     <a href="#" class="hover:text-brand transition">Movies</a>
     <a href="#" class="hover:text-brand transition">Theaters</a>
     <a href="#" class="hover:text-brand transition">Releases</a>
-    <a href="#" class="text-brand transition font-semibold">Snacks</a>
+    <a href="/snacks-admin.html" class="text-brand transition font-semibold">Snacks</a>
   </div>
-  <div>
+  <div class="flex items-center space-x-4">
+    <span id="admin-user-label" class="hidden text-sm text-gray-400"></span>
+    <a href="/snacks-user.html" class="bg-white/10 hover:bg-white/20 px-5 py-2 rounded-full text-sm font-semibold transition">
+      Customer View
+    </a>
     <a href="/index.html" class="bg-white/10 hover:bg-white/20 px-6 py-2 rounded-full font-semibold transition">
       ← Back
     </a>
@@ -170,7 +174,25 @@
   </div>
 </div>
 
+<script src="/js/auth.js"></script>
 <script>
+  /** Only admins may use this page; others are redirected. */
+  function requireAdminAccess() {
+    if (!AuthService.isAuthenticated()) {
+      window.location.href = '/index.html';
+      return false;
+    }
+    if (!AuthService.isAdmin()) {
+      window.location.href = '/snacks-user.html';
+      return false;
+    }
+    const user = AuthService.getCurrentUser();
+    const label = document.getElementById('admin-user-label');
+    label.textContent = 'Admin: ' + user.username;
+    label.classList.remove('hidden');
+    return true;
+  }
+
   let allSnacks = [];
   let currentCategory = 'All';
 
@@ -231,6 +253,8 @@
     try {
       const res = await fetch('/api/snacks');
       allSnacks = await res.json();
+      // Management view: stable order by snack ID (not shuffled)
+      allSnacks.sort((a, b) => a.snackId.localeCompare(b.snackId));
       renderSnacks(allSnacks);
     } catch (err) {
       console.error('Failed to load snacks:', err);
@@ -305,9 +329,19 @@
             .forEach(id => document.getElementById(id).value = '');
   }
 
+  function generateNextSnackId() {
+    let maxNum = 0;
+    allSnacks.forEach(s => {
+      const match = /^S(\d+)$/i.exec(s.snackId || '');
+      if (match) {
+        maxNum = Math.max(maxNum, parseInt(match[1], 10));
+      }
+    });
+    return 'S' + String(maxNum + 1).padStart(3, '0');
+  }
+
   async function submitAddSnack() {
-    // Auto-generate snack ID based on current timestamp
-    const autoId = 'S' + String(Date.now()).slice(-4);
+    const autoId = generateNextSnackId();
     const snack = {
       snackId:   autoId,
       name:      document.getElementById('add-name').value.trim(),
@@ -411,7 +445,9 @@
     } catch (err) { console.error(err); }
   }
 
-  loadSnacks();
+  if (requireAdminAccess()) {
+    loadSnacks();
+  }
 </script>
 </body>
 </html>
