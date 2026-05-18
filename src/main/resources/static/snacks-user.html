@@ -25,10 +25,6 @@
 <nav class="flex items-center justify-between px-10 py-6">
     <div class="flex items-center space-x-4">
         <a href="/index.html" class="text-2xl font-bold tracking-wider"><span class="text-brand">Q</span>uickShow</a>
-        <button type="button" onclick="openCart()"
-                class="bg-brand hover:bg-pink-600 px-5 py-2 rounded-full text-sm font-bold transition">
-            Place Order
-        </button>
         <a id="admin-manage-link" href="/snacks-admin.html"
            class="hidden bg-white/10 hover:bg-white/20 px-5 py-2 rounded-full text-sm font-semibold transition">
             Manage Snacks
@@ -140,13 +136,13 @@
 
         <div class="space-y-4">
             <div>
-                <label class="block text-sm text-gray-400 mb-1">Username</label>
-                <input type="text" id="checkout-username" placeholder="Enter your username"
+                <label class="block text-sm text-gray-400 mb-1">Email or Username</label>
+                <input type="text" id="checkout-username" placeholder="Email or Username"
                        class="w-full bg-darkbg border border-white/20 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-brand" />
             </div>
             <div>
                 <label class="block text-sm text-gray-400 mb-1">Password</label>
-                <input type="password" id="checkout-password" placeholder="Enter your password"
+                <input type="password" id="checkout-password" placeholder="Password"
                        class="w-full bg-darkbg border border-white/20 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-brand" />
             </div>
         </div>
@@ -227,15 +223,66 @@
 
     let allSnacks = [];
     let cart = {};
+    let currentCategory = 'All';
+
+    /** Random display order for customer browsing (management page keeps sorted order). */
+    function shuffleSnacks(snacks) {
+        const list = snacks.slice();
+        for (let i = list.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [list[i], list[j]] = [list[j], list[i]];
+        }
+        return list;
+    }
 
     async function loadSnacks() {
         try {
             const res = await fetch('/api/snacks');
-            allSnacks = await res.json();
+            allSnacks = shuffleSnacks(await res.json());
             document.getElementById('loading-state').classList.add('hidden');
-            renderSnacks(allSnacks);
+            renderSnacks(getFilteredSnacks());
         } catch (err) {
             document.getElementById('loading-state').textContent = 'Failed to load snacks.';
+        }
+    }
+
+    function getFilteredSnacks() {
+        return currentCategory === 'All'
+            ? allSnacks
+            : allSnacks.filter(s => s.category === currentCategory);
+    }
+
+    function renderSnackCartControls(snack) {
+        const qty = cart[snack.snackId]?.qty || 0;
+
+        if (qty === 0) {
+            return `<button type="button" onclick="addToCartById('${snack.snackId}')"
+                    class="mt-auto w-full bg-brand hover:bg-pink-600 py-2 rounded-full font-semibold transition text-sm">
+                🛒 Add to Cart
+            </button>`;
+        }
+
+        return `<div class="mt-auto flex items-center justify-center gap-3 w-full">
+            <button type="button" onclick="changeQty('${snack.snackId}', -1)"
+                    class="w-9 h-9 bg-white/10 hover:bg-white/20 rounded-full text-lg font-bold transition">−</button>
+            <span class="min-w-[2rem] text-center text-lg font-bold">${qty}</span>
+            <button type="button" onclick="changeQty('${snack.snackId}', 1)"
+                    class="w-9 h-9 bg-white/10 hover:bg-white/20 rounded-full text-lg font-bold transition">+</button>
+        </div>`;
+    }
+
+    function addToCartById(snackId) {
+        const snack = allSnacks.find(s => s.snackId === snackId);
+        if (snack) {
+            addToCart(snack);
+        }
+    }
+
+    function refreshSnackCardControls(snackId) {
+        const snack = allSnacks.find(s => s.snackId === snackId);
+        const el = document.getElementById('snack-controls-' + snackId);
+        if (snack && el) {
+            el.innerHTML = renderSnackCartControls(snack);
         }
     }
 
@@ -255,39 +302,53 @@
                     <span class="text-xs text-brand font-semibold uppercase tracking-wider mb-1">${snack.category}</span>
                     <h3 class="text-lg font-bold mb-1">${snack.name}</h3>
                     <p class="text-brand font-bold text-lg mb-4">Rs. ${snack.price.toFixed(2)}</p>
-                    <button onclick='addToCart(${JSON.stringify(snack)})'
-                            class="mt-auto w-full bg-brand hover:bg-pink-600 py-2 rounded-full font-semibold transition text-sm">
-                        🛒 Add to Cart
-                    </button>
+                    <div id="snack-controls-${snack.snackId}">
+                        ${renderSnackCartControls(snack)}
+                    </div>
                 </div>`;
         });
     }
 
     function filterCategory(category) {
+        currentCategory = category;
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('bg-brand'); btn.classList.add('bg-white/10');
         });
         document.getElementById('tab-' + category).classList.add('bg-brand');
         document.getElementById('tab-' + category).classList.remove('bg-white/10');
-        renderSnacks(category === 'All' ? allSnacks : allSnacks.filter(s => s.category === category));
+        renderSnacks(getFilteredSnacks());
     }
 
     function addToCart(snack) {
-        if (cart[snack.snackId]) { cart[snack.snackId].qty++; }
-        else { cart[snack.snackId] = { snack, qty: 1 }; }
+        if (!cart[snack.snackId]) {
+            cart[snack.snackId] = { snack, qty: 1 };
+        }
         updateCartUI();
+        refreshSnackCardControls(snack.snackId);
     }
 
-    function removeFromCart(snackId) { delete cart[snackId]; updateCartUI(); }
+    function removeFromCart(snackId) {
+        delete cart[snackId];
+        updateCartUI();
+        refreshSnackCardControls(snackId);
+    }
 
     function changeQty(snackId, delta) {
         if (!cart[snackId]) return;
         cart[snackId].qty += delta;
-        if (cart[snackId].qty <= 0) delete cart[snackId];
+        if (cart[snackId].qty <= 0) {
+            delete cart[snackId];
+        }
         updateCartUI();
+        refreshSnackCardControls(snackId);
     }
 
-    function clearCart() { cart = {}; updateCartUI(); }
+    function clearCart() {
+        const ids = Object.keys(cart);
+        cart = {};
+        updateCartUI();
+        ids.forEach(refreshSnackCardControls);
+    }
 
     function updateCartUI() {
         const items = Object.values(cart);
@@ -330,7 +391,7 @@
         }
     }
 
-    /** Opens the cart sidebar (top-left Place Order + cart icon). */
+    /** Opens the cart sidebar (cart icon). */
     function openCart() {
         document.getElementById('cart-sidebar').classList.remove('hidden');
         document.getElementById('cart-overlay').classList.remove('hidden');
