@@ -23,8 +23,12 @@
 
 <!-- Navigation -->
 <nav class="flex items-center justify-between px-10 py-6">
-    <div class="flex items-center space-x-2">
+    <div class="flex items-center space-x-4">
         <a href="/index.html" class="text-2xl font-bold tracking-wider"><span class="text-brand">Q</span>uickShow</a>
+        <button type="button" onclick="openCart()"
+                class="bg-brand hover:bg-pink-600 px-5 py-2 rounded-full text-sm font-bold transition">
+            Place Order
+        </button>
     </div>
     <div class="hidden md:flex space-x-8 bg-white/10 px-6 py-2 rounded-full backdrop-blur-md">
         <a href="/index.html" class="hover:text-brand transition">Home</a>
@@ -101,9 +105,9 @@
             <span class="text-gray-400 font-semibold">Total</span>
             <span id="cart-total" class="text-brand font-bold text-xl">Rs. 0.00</span>
         </div>
-        <button onclick="checkout()"
-                class="w-full bg-brand hover:bg-pink-600 py-3 rounded-full font-bold transition text-lg">
-            Checkout
+        <button id="cart-place-order-btn" onclick="checkout()"
+                class="w-full bg-brand hover:bg-pink-600 py-3 rounded-full font-bold transition text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+            Place Order
         </button>
         <button onclick="clearCart()"
                 class="w-full mt-2 bg-white/10 hover:bg-white/20 py-2 rounded-full text-sm font-semibold transition">
@@ -116,7 +120,7 @@
 <div id="cart-overlay" class="hidden fixed inset-0 bg-black/50 z-40" onclick="toggleCart()"></div>
 
 <!-- ── LOGIN POPUP (shown at checkout if not logged in) ────────── -->
-<div id="login-popup" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+<div id="login-popup" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[60]">
     <div class="bg-cardbg rounded-2xl shadow-xl p-8 w-full max-w-sm mx-4">
 
         <div class="text-center mb-6">
@@ -167,6 +171,7 @@
         <div class="text-5xl mb-4">🎉</div>
         <h2 class="text-2xl font-bold mb-2">Order Placed!</h2>
         <p id="order-username" class="text-brand font-semibold mb-1"></p>
+        <p id="order-total-msg" class="text-gray-300 text-sm mb-2"></p>
         <p class="text-gray-400 mb-6">Your snacks will be ready at the counter. Enjoy the show!</p>
         <button onclick="closeCheckout()"
                 class="w-full bg-brand hover:bg-pink-600 py-3 rounded-full font-bold transition">
@@ -175,6 +180,7 @@
     </div>
 </div>
 
+<script src="/js/auth.js"></script>
 <script>
     const snackImages = {
         'popcorn':       'https://images.unsplash.com/photo-1585647347483-22b66260dfff?w=500&q=80',
@@ -320,64 +326,57 @@
         }
     }
 
-    function toggleCart() {
-        document.getElementById('cart-sidebar').classList.toggle('hidden');
-        document.getElementById('cart-overlay').classList.toggle('hidden');
+    /** Opens the cart sidebar (top-left Place Order + cart icon). */
+    function openCart() {
+        document.getElementById('cart-sidebar').classList.remove('hidden');
+        document.getElementById('cart-overlay').classList.remove('hidden');
     }
 
-    // ── CHECKOUT: check login first ────────────────────────────────
+    function closeCartPanel() {
+        document.getElementById('cart-sidebar').classList.add('hidden');
+        document.getElementById('cart-overlay').classList.add('hidden');
+    }
+
+    function toggleCart() {
+        const sidebar = document.getElementById('cart-sidebar');
+        if (sidebar.classList.contains('hidden')) {
+            openCart();
+        } else {
+            closeCartPanel();
+        }
+    }
+
+    // ── Cart "Place Order": login if needed, else submit order ───
     function checkout() {
-        if (Object.keys(cart).length === 0) return;
+        if (Object.keys(cart).length === 0) {
+            alert('Your cart is empty. Add some snacks first!');
+            return;
+        }
 
-        const raw = sessionStorage.getItem('loggedInUser');
-
-        if (!raw) {
-            // ── Not logged in → close cart → show login popup ──
-            document.getElementById('cart-sidebar').classList.add('hidden');
-            document.getElementById('cart-overlay').classList.add('hidden');
+        if (!AuthService.isAuthenticated()) {
+            document.getElementById('login-error').classList.add('hidden');
             document.getElementById('login-popup').classList.remove('hidden');
             return;
         }
 
-        // ── Already logged in → place order directly ──
-        const user = JSON.parse(raw);
-        placeOrder(user.username);
+        placeOrder(AuthService.getCurrentUser());
     }
-    // ── LOGIN POPUP at checkout ────────────────────────────────────
+
+    // ── LOGIN POPUP at checkout (reuses AuthService + same modal) ──
     async function submitCheckoutLogin() {
-        const username = document.getElementById('checkout-username').value.trim();
-        const password = document.getElementById('checkout-password').value.trim();
+        const username = document.getElementById('checkout-username').value;
+        const password = document.getElementById('checkout-password').value;
         const errorEl  = document.getElementById('login-error');
 
-        if (!username || !password) {
-            errorEl.textContent = '⚠️ Please enter username and password.';
-            errorEl.classList.remove('hidden');
-            return;
-        }
+        errorEl.classList.add('hidden');
 
-        try {
-            const res  = await fetch('/api/users/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
+        const result = await AuthService.login(username, password);
 
-            if (res.ok) {
-                // Save to sessionStorage
-                sessionStorage.setItem('loggedInUser', JSON.stringify({
-                    userId:   data.userId,
-                    username: data.username,
-                    type:     data.type
-                }));
-                closeLoginPopup();
-                placeOrder(data.username);
-            } else {
-                errorEl.textContent = '❌ Invalid username or password.';
-                errorEl.classList.remove('hidden');
-            }
-        } catch (err) {
-            errorEl.textContent = '❌ Something went wrong. Please try again.';
+        if (result.ok) {
+            closeLoginPopup();
+            await placeOrder(result.user);
+        } else {
+            errorEl.textContent = '❌ ' + result.error;
             errorEl.classList.remove('hidden');
         }
     }
@@ -389,15 +388,56 @@
         document.getElementById('login-error').classList.add('hidden');
     }
 
-    // ── Place order and show success ───────────────────────────────
-    function placeOrder(username) {
-        document.getElementById('order-username').textContent = '👋 ' + username + ', your order is confirmed!';
-        document.getElementById('checkout-popup').classList.remove('hidden');
-        clearCart();
+    /**
+     * Sends the cart to POST /api/orders. Success popup only after server confirms.
+     */
+    async function placeOrder(user) {
+        if (!user || !AuthService.isAuthenticated()) {
+            document.getElementById('login-popup').classList.remove('hidden');
+            return;
+        }
+
+        const placeBtn = document.getElementById('cart-place-order-btn');
+        placeBtn.disabled = true;
+        placeBtn.textContent = 'Placing order...';
+
+        const items = Object.values(cart).map(({ snack, qty }) => ({
+            snackId: snack.snackId,
+            quantity: qty
+        }));
+
+        try {
+            const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.userId, items })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.error || 'Could not place order. Please try again.');
+                return;
+            }
+
+            document.getElementById('order-username').textContent =
+                '👋 ' + data.username + ', your order is confirmed!';
+            document.getElementById('order-total-msg').textContent =
+                'Order #' + data.orderId + ' · Total Rs. ' + Number(data.totalAmount).toFixed(2);
+            closeCartPanel();
+            document.getElementById('checkout-popup').classList.remove('hidden');
+            clearCart();
+        } catch (err) {
+            alert('❌ Network error. Could not place your order.');
+        } finally {
+            placeBtn.disabled = false;
+            placeBtn.textContent = 'Place Order';
+        }
     }
 
     function closeCheckout() {
         document.getElementById('checkout-popup').classList.add('hidden');
+        document.getElementById('order-total-msg').textContent = '';
     }
 
     // Allow Enter key in login popup
