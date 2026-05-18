@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snacks | QuickShow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#ff4d6d',
+                        darkbg: '#0a0a0f',
+                        cardbg: '#161b28',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-darkbg text-white font-sans min-h-screen">
+
+<!-- Navigation -->
+<nav class="flex items-center justify-between px-10 py-6">
+    <div class="flex items-center space-x-2">
+        <a href="/index.html" class="text-2xl font-bold tracking-wider"><span class="text-brand">Q</span>uickShow</a>
+    </div>
+    <div class="hidden md:flex space-x-8 bg-white/10 px-6 py-2 rounded-full backdrop-blur-md">
+        <a href="/index.html" class="hover:text-brand transition">Home</a>
+        <a href="#" class="hover:text-brand transition">Movies</a>
+        <a href="#" class="hover:text-brand transition">Theaters</a>
+        <a href="#" class="hover:text-brand transition">Releases</a>
+        <a href="#" class="text-brand font-semibold transition">Snacks</a>
+    </div>
+    <div>
+        <a href="/index.html" class="bg-white/10 hover:bg-white/20 px-6 py-2 rounded-full font-semibold transition">
+            ← Back
+        </a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="flex flex-col items-center justify-center px-10 py-20">
+
+    <!-- Friendly Message -->
+    <div class="text-center mb-10">
+        <div class="text-7xl mb-6">🍿</div>
+        <h1 class="text-4xl font-bold mb-3">
+            Hungry for <span class="text-brand">Snacks?</span>
+        </h1>
+        <p class="text-gray-400 text-lg max-w-md mx-auto">
+            Please login to browse our delicious snacks and place your order.
+            Your perfect cinema snack is just a login away! 🎬
+        </p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="bg-cardbg border border-white/10 rounded-2xl shadow-xl p-8 w-full max-w-sm">
+        <h2 class="text-xl font-semibold text-white mb-6 text-center">Sign in to continue</h2>
+
+        <!-- Error Message -->
+        <div id="error-msg" class="hidden bg-red-500/20 border border-red-500/50 text-red-400 text-sm rounded-lg px-4 py-2 mb-4 text-center"></div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Username</label>
+                <input type="text" id="login-username" placeholder="Enter your username"
+                       class="w-full bg-darkbg border border-white/20 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-brand" />
+            </div>
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Password</label>
+                <input type="password" id="login-password" placeholder="Enter your password"
+                       class="w-full bg-darkbg border border-white/20 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-brand" />
+            </div>
+        </div>
+
+        <button onclick="submitLogin()"
+                class="w-full mt-6 bg-brand hover:bg-pink-600 text-white rounded-full px-4 py-3 text-sm font-bold transition">
+            Login & View Snacks 🍿
+        </button>
+
+        <div class="mt-4 text-center">
+            <a href="/index.html" class="text-gray-500 hover:text-gray-300 text-sm transition">
+                ← Go back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function submitLogin() {
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value.trim();
+        const errorMsg = document.getElementById('error-msg');
+
+        if (!username || !password) {
+            errorMsg.textContent = '⚠️ Please enter username and password.';
+            errorMsg.classList.remove('hidden');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/users/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                // Save login info to session storage
+                sessionStorage.setItem('loggedInUser', JSON.stringify(data));
+
+                // Redirect based on user type
+                if (data.type === 'Admin') {
+                    window.location.href = '/snacks-admin.html';
+                } else {
+                    window.location.href = '/snacks-user.html';
+                }
+            } else {
+                errorMsg.textContent = '❌ Invalid username or password. Please try again.';
+                errorMsg.classList.remove('hidden');
+            }
+        } catch (err) {
+            errorMsg.textContent = '❌ Something went wrong. Please try again.';
+            errorMsg.classList.remove('hidden');
+        }
+    }
+
+    // Allow pressing Enter to login
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') submitLogin();
+    });
+</script>
+</body>
+</html>
