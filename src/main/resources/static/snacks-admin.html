@@ -38,10 +38,6 @@
     <a href="/snacks-user.html" class="bg-white/10 hover:bg-white/20 px-5 py-2 rounded-full text-sm font-semibold transition">
       Customer View
     </a>
-    <button type="button" onclick="adminSignOut()"
-            class="bg-brand/20 hover:bg-brand/40 text-brand px-5 py-2 rounded-full text-sm font-semibold transition">
-      Sign out
-    </button>
     <a href="/index.html" class="bg-white/10 hover:bg-white/20 px-6 py-2 rounded-full font-semibold transition">
       ← Back
     </a>
@@ -197,11 +193,6 @@
     return true;
   }
 
-  function adminSignOut() {
-    AuthService.clearSession();
-    window.location.href = '/index.html';
-  }
-
   let allSnacks = [];
   let currentCategory = 'All';
 
@@ -262,6 +253,8 @@
     try {
       const res = await fetch('/api/snacks');
       allSnacks = await res.json();
+      // Management view: stable order by snack ID (not shuffled)
+      allSnacks.sort((a, b) => a.snackId.localeCompare(b.snackId));
       renderSnacks(allSnacks);
     } catch (err) {
       console.error('Failed to load snacks:', err);
