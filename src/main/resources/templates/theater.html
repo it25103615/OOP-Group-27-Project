@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Theaters</title>
+
+    <style>
+
+        body{
+            margin:0;
+            background:#050816;
+            font-family:Arial;
+            color:white;
+        }
+
+        .navbar{
+            background:#0b1020;
+            padding:20px 40px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        }
+
+        .logo{
+            color:#ff4d6d;
+            font-size:32px;
+            font-weight:bold;
+        }
+
+        .nav-links a{
+            color:white;
+            text-decoration:none;
+            margin-left:20px;
+        }
+
+        .container{
+            padding:40px;
+        }
+
+        .title{
+            font-size:42px;
+            margin-bottom:40px;
+        }
+
+        .theater-grid{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:30px;
+        }
+
+        .card{
+            background:#111827;
+            border-radius:20px;
+            overflow:hidden;
+            transition:0.3s;
+        }
+
+        .card:hover{
+            transform:scale(1.03);
+        }
+
+        .card img{
+            width:100%;
+            height:230px;
+            object-fit:cover;
+        }
+
+        .card-content{
+            padding:20px;
+        }
+
+        .card h2{
+            margin:0;
+        }
+
+        .location{
+            margin-top:10px;
+            color:gray;
+        }
+
+        .btn{
+            margin-top:20px;
+            display:inline-block;
+            background:#ff4d6d;
+            color:white;
+            text-decoration:none;
+            padding:12px 24px;
+            border-radius:30px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="navbar">
+
+    <div class="logo">
+        QuickShow
+    </div>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/theaters">Theaters</a>
+    </div>
+
+</div>
+
+<div class="container">
+
+    <div class="title">
+        Explore Theaters
+    </div>
+
+    <div class="theater-grid">
+
+        <div class="card">
+
+            <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba">
+
+            <div class="card-content">
+
+                <h2>Colombo Cineplex</h2>
+
+                <div class="location">
+                    Colombo
+                </div>
+
+                <a class="btn" href="/seats">
+                    View Seats
+                </a>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c">
+
+            <div class="card-content">
+
+                <h2>Majestic Cinema</h2>
+
+                <div class="location">
+                    Bambalapitiya
+                </div>
+
+                <a class="btn" href="/seats">
+                    View Seats
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+</div>
+
+</body>
+</html>>

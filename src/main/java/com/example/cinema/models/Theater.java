@@ -48,6 +48,7 @@ public class Theater {
 
     // Getters
     public String  getId(){
+
         return id;
     }
     public String  getName()        {
