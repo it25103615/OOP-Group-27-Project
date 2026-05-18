@@ -40,7 +40,7 @@
         <a href="#" class="hover:text-brand transition">Movies</a>
         <a href="#" class="hover:text-brand transition">Theaters</a>
         <a href="#" class="hover:text-brand transition">Releases</a>
-        <a href="/snacks-login.html" class="hover:text-brand transition">Snacks</a>
+        <a href="#" onclick="handleSnacksClick(event)" class="hover:text-brand transition">Snacks</a>
 
     </div>
     <div class="flex items-center space-x-6">
@@ -74,7 +74,7 @@
             >
                 <a href="#" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Movies</a>
                 <a href="#" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Theaters</a>
-                <a href="/snacks-admin.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Snacks</a>
+                <a href="/snacks-user.html" class="hover:text-brand transition">Snacks</a>
                 <a href="#" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Users</a>
                 <button
                         onclick="signOut()"
@@ -240,12 +240,6 @@
         document.getElementById('login-password').value = '';
     }
 
-    function closeLogin() {
-        document.getElementById('login-popup').classList.add('hidden');
-        document.getElementById('login-username').value = '';
-        document.getElementById('login-password').value = '';
-    }
-
     // ── SEARCH ──────────────────────────────────────────────────
     function toggleSearch() {
         const bar = document.getElementById('search-bar');
@@ -282,7 +276,17 @@
             </div>
         `).join('');
     }
-    
+    function handleSnacksClick(event) {
+        event.preventDefault();
+        const isLoggedIn = document.getElementById('login-button').textContent !== 'Login';
+        if (isLoggedIn) {
+            window.location.href = '/snacks-user.html';
+        } else {
+            document.getElementById('login-popup').classList.remove('hidden');
+            document.getElementById('login-username').placeholder = '🍿 Login to view snacks!';
+        }
+    }
+
 </script>
 </body>
 </html>
