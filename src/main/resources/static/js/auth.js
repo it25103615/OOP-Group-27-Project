@@ -32,6 +32,17 @@ const AuthService = (function () {
         return getCurrentUser() !== null;
     }
 
+    /** @returns {boolean} True when the logged-in user is an Admin. */
+    function isAdmin() {
+        const user = getCurrentUser();
+        return user !== null && user.type === 'Admin';
+    }
+
+    /** @returns {string} Snacks page URL for the current user role. */
+    function getSnacksPageUrl() {
+        return isAdmin() ? '/snacks-admin.html' : '/snacks-user.html';
+    }
+
     /**
      * Persists the logged-in user after a successful login response.
      * @param {object} userData - API response: { userId, username, type }
@@ -93,6 +104,8 @@ const AuthService = (function () {
     return {
         getCurrentUser,
         isAuthenticated,
+        isAdmin,
+        getSnacksPageUrl,
         setSession,
         clearSession,
         login
