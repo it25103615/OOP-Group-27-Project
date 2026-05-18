@@ -7,9 +7,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class PageController {
 
-    @GetMapping("/")
-    public String showHomaPage(){
-        return "index";  // show then index.html
+    /** Homepage lives in src/main/resources/static/index.html (not templates/). */
+    @GetMapping({"/", "/index"})
+    public String showHomePage() {
+        return "redirect:/index.html";
     }
     @GetMapping("/details")
     public String showMovieDetails(){
