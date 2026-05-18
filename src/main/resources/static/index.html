@@ -36,8 +36,10 @@
         <span class="text-2xl font-bold tracking-wider"><span class="text-brand">Q</span>uickShow</span>
     </div>
     <div class="hidden md:flex space-x-8 bg-white/10 px-6 py-2 rounded-full backdrop-blur-md">
-        <a href="#" class="hover:text-brand transition">Home</a>
-        <a href="#" class="hover:text-brand transition">Movies</a>
+
+        <!-- html links for anchor button  -->
+        <a href="/" class="hover:text-brand transition">Home</a>
+        <a href="/details" class="hover:text-brand transition">Movies</a>
         <a href="#" class="hover:text-brand transition">Theaters</a>
         <a href="#" class="hover:text-brand transition">Releases</a>
         <a href="/snacks-login.html" class="hover:text-brand transition">Snacks</a>
@@ -162,7 +164,7 @@
                     <h3 class="text-lg font-bold mb-1">${movie.title}</h3>
                     <p class="text-xs text-gray-400 mb-4">${movie.year} • ${movie.genre} • ${movie.duration}</p>
                     <div class="mt-auto flex justify-between items-center">
-                        <button class="bg-brand hover:bg-pink-600 px-4 py-1.5 rounded-full text-sm font-semibold transition">Buy Tickets</button>
+                        <a href="/details" class="bg-brand hover:bg-pink-600 px-4 py-1.5 rounded-full text-sm font-semibold transition inline-block">Buy Tickets</a>
                         <div class="flex items-center text-sm">
                             <span class="text-brand mr-1">★</span> ${movie.rating}
                         </div>
