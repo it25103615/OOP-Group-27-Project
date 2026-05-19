@@ -70,57 +70,40 @@
 </header>
 
 <!-- Now Showing Grid -->
-</header>
-    <section class="px-10 py-16">
+<section class="px-10 py-16">
     <h2 class="text-2xl font-bold mb-8">Now Showing</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-        <div th:each="movie : ${movies}" class="bg-cardbg rounded-2xl p-4 flex flex-col transition hover:-translate-y-1 hover:shadow-lg hover:shadow-brand/20">
-            <img th:src="${movie.poster}" alt="Poster" class="rounded-xl h-64 object-cover w-full mb-4">
-
-            <h3 class="text-lg font-bold mb-1" th:text="${movie.movieId}">Movie Title</h3>
-            <p class="text-xs text-gray-400 mb-4 truncate" th:text="${movie.summary}">Summary</p>
-            <div class="text-xs text-gray-400 mb-4">
-                <span>Showtimes: </span><span th:text="${movie.showtimes}">10:00 AM</span>
-            </div>
-
-            <div class="mt-auto flex justify-between items-center">
-                <a th:href="@{/movies/view/{id}(id=${movie.movieId})}" class="bg-brand hover:bg-pink-600 px-4 py-1.5 rounded-full text-sm font-semibold transition inline-block">
-                    View Details
-                </a>
-            </div>
-        </div>
-
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="movie-grid">
+        <!-- Movie cards will be injected here by JavaScript -->
     </div>
 </section>
 
-<!--<script>-->
-<!--    // JavaScript to dynamically fetch and render movies-->
-<!--    const movies = [-->
-<!--        { title: "Zootopia 2", genre: "Animation | Family", year: 2025, duration: "1h 47m", rating: 7.5, image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&q=80" },-->
-<!--        { title: "Sinners", genre: "Horror | Action", year: 2025, duration: "2h 18m", rating: 7.5, image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=500&q=80" },-->
-<!--        { title: "Avatar: Fire and Ash", genre: "Science Fiction", year: 2025, duration: "3h 18m", rating: 7.4, image: "https://images.unsplash.com/photo-1618519764620-7403abdbdf9c?w=500&q=80" }-->
-<!--    ];-->
-
-<!--    const movieGrid = document.getElementById('movie-grid');-->
-
-<!--    movies.forEach(movie => {-->
-<!--        const card = `-->
-<!--                <div class="bg-cardbg rounded-2xl p-4 flex flex-col transition hover:-translate-y-1 hover:shadow-lg hover:shadow-brand/20">-->
-<!--                    <img src="${movie.image}" alt="${movie.title}" class="rounded-xl h-64 object-cover w-full mb-4">-->
-<!--                    <h3 class="text-lg font-bold mb-1">${movie.title}</h3>-->
-<!--                    <p class="text-xs text-gray-400 mb-4">${movie.year} • ${movie.genre} • ${movie.duration}</p>-->
-<!--                    <div class="mt-auto flex justify-between items-center">-->
-<!--                        <button class="bg-brand hover:bg-pink-600 px-4 py-1.5 rounded-full text-sm font-semibold transition">Buy Tickets</button>-->
-<!--                        <div class="flex items-center text-sm">-->
-<!--                            <span class="text-brand mr-1">★</span> ${movie.rating}-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            `;-->
-<!--        movieGrid.innerHTML += card;-->
-<!--    });-->
 <script>
+    // JavaScript to dynamically fetch and render movies
+    const movies = [
+        { title: "Zootopia 2", genre: "Animation | Family", year: 2025, duration: "1h 47m", rating: 7.5, image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&q=80" },
+        { title: "Sinners", genre: "Horror | Action", year: 2025, duration: "2h 18m", rating: 7.5, image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=500&q=80" },
+        { title: "Avatar: Fire and Ash", genre: "Science Fiction", year: 2025, duration: "3h 18m", rating: 7.4, image: "https://images.unsplash.com/photo-1618519764620-7403abdbdf9c?w=500&q=80" }
+    ];
+
+    const movieGrid = document.getElementById('movie-grid');
+
+    movies.forEach(movie => {
+        const card = `
+                <div class="bg-cardbg rounded-2xl p-4 flex flex-col transition hover:-translate-y-1 hover:shadow-lg hover:shadow-brand/20">
+                    <img src="${movie.image}" alt="${movie.title}" class="rounded-xl h-64 object-cover w-full mb-4">
+                    <h3 class="text-lg font-bold mb-1">${movie.title}</h3>
+                    <p class="text-xs text-gray-400 mb-4">${movie.year} • ${movie.genre} • ${movie.duration}</p>
+                    <div class="mt-auto flex justify-between items-center">
+                        <button class="bg-brand hover:bg-pink-600 px-4 py-1.5 rounded-full text-sm font-semibold transition">Buy Tickets</button>
+                        <div class="flex items-center text-sm">
+                            <span class="text-brand mr-1">★</span> ${movie.rating}
+                        </div>
+                    </div>
+                </div>
+            `;
+        movieGrid.innerHTML += card;
+    });
+
     function login() {
         alert("Login modal would open here!");
     }
