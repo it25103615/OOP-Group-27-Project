@@ -58,8 +58,7 @@ import java.util.TreeMap;
                                   @RequestParam(defaultValue = "false") boolean hasAC,
                                   @RequestParam String theaterType,
                                   Model model) {
-            String id = theaterService.addTheater(name, location, capacity,
-                    screenCount, hasAC, theaterType);
+            String id = theaterService.addTheater(name, location, capacity);
             if (id != null) {
                 return "redirect:/theater/list?msg=Theater added successfully";
             }
