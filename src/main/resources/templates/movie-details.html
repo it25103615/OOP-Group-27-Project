@@ -19,14 +19,14 @@
 
         <div>
             <span class="bg-brand text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block">Now Showing</span>
-            <h1 class="text-4xl md:text-5xl font-bold mb-4" th:text="${movie.movieId}">Movie Title</h1>
+            <h1 class="text-4xl md:text-5xl font-bold mb-2" th:text="${movie.title}">Movie Title</h1>
             <p class="text-gray-300 text-lg mb-6 leading-relaxed" th:text="${movie.summary}">
                 Movie summary goes here...
             </p>
             <div class="flex flex-wrap gap-4 text-sm">
                 <div class="bg-cardbg/80 backdrop-blur px-4 py-2 rounded-lg border border-gray-800">
                     <span class="text-gray-400 block text-xs">Showtimes</span>
-                    <span class="font-semibold" th:text="${movie.showtimes}">10:00 AM</span>
+                    <span class="font-semibold" th:text="${movie.showtime}">10:00 AM</span>
                 </div>
                 <div class="bg-cardbg/80 backdrop-blur px-4 py-2 rounded-lg border border-gray-800">
                     <span class="text-gray-400 block text-xs">Theater</span>
