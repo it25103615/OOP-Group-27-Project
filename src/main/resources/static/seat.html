@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seats - QuickShow</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#ff4d6d',
+                        darkbg: '#0a0a0f',
+                        cardbg: '#161b28',
+                    }
+                }
+            }
+        }
+    </script>
+
+</head>
+
+<body class="bg-darkbg text-white min-h-screen">
+
+<!-- NAVBAR -->
+<nav class="flex items-center justify-between px-10 py-6">
+
+    <div class="text-2xl font-bold tracking-wider">
+        <span class="text-brand">Q</span>uickShow
+    </div>
+
+    <a href="/theaters.html"
+       class="bg-brand px-5 py-2 rounded-full font-semibold hover:bg-pink-600 transition">
+        Back
+    </a>
+
+</nav>
+
+<!-- TITLE -->
+<div class="text-center mt-8">
+
+    <h1 class="text-4xl font-bold">
+        Colombo Cineplex
+    </h1>
+
+    <p class="text-gray-400 mt-2">
+        Select Your Seats
+    </p>
+
+</div>
+
+<!-- SCREEN -->
+<div class="w-2/3 mx-auto mt-10 bg-white text-black text-center py-3 rounded-xl font-bold shadow-lg">
+
+    SCREEN
+
+</div>
+
+<!-- SEATS -->
+<div class="mt-16 flex flex-col items-center gap-5">
+
+    <!-- ROW A -->
+    <div class="flex gap-4">
+
+        <button class="w-14 h-14 bg-green-500 rounded-xl font-bold hover:scale-110 transition">
+            A1
+        </button>
+
+        <button class="w-14 h-14 bg-green-500 rounded-xl font-bold hover:scale-110 transition">
+            A2
+        </button>
+
+        <button class="w-14 h-14 bg-red-500 rounded-xl font-bold cursor-not-allowed">
+            A3
+        </button>
+
+        <button class="w-14 h-14 bg-yellow-400 text-black rounded-xl font-bold hover:scale-110 transition">
+            A4
+        </button>
+
+        <button class="w-14 h-14 bg-yellow-400 text-black rounded-xl font-bold hover:scale-110 transition">
+            A5
+        </button>
+
+    </div>
+
+    <!-- ROW B -->
+    <div class="flex gap-4">
+
+        <button class="w-14 h-14 bg-green-500 rounded-xl font-bold hover:scale-110 transition">
+            B1
+        </button>
+
+        <button class="w-14 h-14 bg-red-500 rounded-xl font-bold cursor-not-allowed">
+            B2
+        </button>
+
+        <button class="w-14 h-14 bg-green-500 rounded-xl font-bold hover:scale-110 transition">
+            B3
+        </button>
+
+        <button class="w-14 h-14 bg-green-500 rounded-xl font-bold hover:scale-110 transition">
+            B4
+        </button>
+
+        <button class="w-14 h-14 bg-yellow-400 text-black rounded-xl font-bold hover:scale-110 transition">
+            B5
+        </button>
+
+    </div>
+
+</div>
+
+<!-- LEGEND -->
+<div class="flex justify-center gap-10 mt-16 text-sm">
+
+    <div class="flex items-center gap-2">
+        <div class="w-5 h-5 bg-green-500 rounded"></div>
+        Available
+    </div>
+
+    <div class="flex items-center gap-2">
+        <div class="w-5 h-5 bg-red-500 rounded"></div>
+        Reserved
+    </div>
+
+    <div class="flex items-center gap-2">
+        <div class="w-5 h-5 bg-yellow-400 rounded"></div>
+        VIP
+    </div>
+
+</div>
+
+</body>
+</html>
