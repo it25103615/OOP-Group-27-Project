@@ -37,10 +37,8 @@ import java.util.stream.Collectors;
                     .collect(Collectors.toList());
         }
 
-        // UPDATE
-        public boolean updateTheater(String id, String name, String location,
-                                     int capacity, int screenCount,
-                                     boolean hasAC, String theaterType) {
+        // UPDATE — only fields stored on Theater model (id, name, location, capacity)
+        public boolean updateTheater(String id, String name, String location, int capacity) {
             Theater t = FileHandler.findTheaterById(id);
             if (t == null) return false;
 
