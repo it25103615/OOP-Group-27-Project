@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Movie</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { brand: '#3F000F', darkbg: '#0a0a0f', cardbg: '#161b28' } } } }
+    </script>
+</head>
+<body class="bg-darkbg text-white font-sans min-h-screen flex items-center justify-center p-6">
+
+<div class="bg-cardbg p-8 rounded-2xl w-full max-w-md shadow-2xl border border-gray-800">
+    <h2 class="text-2xl font-bold mb-6 text-center text-brand">Update Movie</h2>
+
+    <form th:action="@{/movies/update/{id}(id=${movie.movieId})}" th:object="${movie}" method="post" class="space-y-4">
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Poster Image URL</label>
+            <input type="text" th:field="*{poster}" class="w-full bg-darkbg border border-gray-700 rounded-lg px-4 py-2 focus:border-brand outline-none" required>
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Summary / Title</label>
+            <textarea th:field="*{summary}" class="w-full bg-darkbg border border-gray-700 rounded-lg px-4 py-2 focus:border-brand outline-none h-24" required></textarea>
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Showtimes</label>
+            <input type="text" th:field="*{showtimes}" class="w-full bg-darkbg border border-gray-700 rounded-lg px-4 py-2 focus:border-brand outline-none" required>
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Theater ID</label>
+            <input type="text" th:field="*{theaterId}" class="w-full bg-darkbg border border-gray-700 rounded-lg px-4 py-2 focus:border-brand outline-none" required>
+        </div>
+
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="flex-1 bg-brand hover:opacity-80 py-2 rounded-lg font-semibold transition">Save Changes</button>
+            <a href="/movies/dashboard" class="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded-lg font-semibold transition text-center">Cancel</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>
