@@ -13,20 +13,12 @@ public class PageController {
     @Autowired
     private MovieRepository movieRepository;
 
-    // data base store movies send index.html
+    // database store movies send index.html
+    // "http://localhost:8080/" showing index.html file
     @GetMapping("/")
     public String showHomePage(Model model){
+
         model.addAttribute("movies",movieRepository.findAll());
         return "index";
     }
-//    @GetMapping("/details")
-//    public String showMovieDetails(){
-//        return "Movie-details"; // show movie details page
-//    }
-    @GetMapping("/add-movie-form")
-    public String showAddMovieForm(){
-        return "add-movie-form"; //show movie form page
-    }
-
-
 }
