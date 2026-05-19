@@ -12,27 +12,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+
 @Component //Similar to @Repository or @Controller; springboot will create an instance of @Component
 class DataSeeder implements CommandLineRunner {
     @Autowired private UserRepository userRepository;
     @Autowired private AdminRepository adminRepository;
     @Autowired private CustomerRepository customerRepository;
     @Autowired private SnackRepository snackRepository;
+    @Autowired private SnackOrderRepository snackOrderRepository;
 
     //CommandLineRunner only has one method "run"
     //  Springboot will look for all instances that implement CommandLineRunner and call their run methods
     @Override
     public void run(String... args) throws Exception {
-        //Check if the database was already initialized at some point
-        if (userRepository.count() > 0) return;
+        if (userRepository.count() == 0) {
+            Admin admin = new Admin("admin", "admin123");
+            adminRepository.save(admin);
 
-        // Create a new admin user
-        Admin admin = new Admin("admin", "admin123");
-        // Save the admin in the database
-        adminRepository.save(admin);
-
-        Customer customer = new Customer("John Doe", "jdoe123", 0111231234, "12 Example Street, Sample Town, Test State");
-        customerRepository.save(customer);
+            Customer customer = new Customer("John Doe", "jdoe123", 0111231234,
+                    "12 Example Street, Sample Town, Test State");
+            customerRepository.save(customer);
+        }
 
         if (snackRepository.count() == 0) {
 
@@ -65,5 +69,53 @@ class DataSeeder implements CommandLineRunner {
             snackRepository.save(new Snack("S022", "Brownie",        220.00, "Sweets",   "images/brownie.png"));
             snackRepository.save(new Snack("S023", "Caramel Apple",  300.00, "Sweets",   "images/caramelapple.png"));
         }
+
+        if (snackOrderRepository.count() == 0) {
+            seedSampleSnackOrders();
+        }
+    }
+
+    /** Example orders in H2 tables snack_orders + snack_order_items (for demo / H2 console). */
+    private void seedSampleSnackOrders() {
+        List<Customer> customers = customerRepository.findAll();
+        if (customers.isEmpty() || snackRepository.count() == 0) {
+            return;
+        }
+
+        Customer customer = customers.get(0);
+
+        SnackOrder order1 = buildOrder(
+                customer,
+                Instant.now().minus(2, ChronoUnit.DAYS),
+                List.of(
+                        new OrderLineItem("S001", "Popcorn", 2, 350.00),
+                        new OrderLineItem("S004", "Coca Cola", 1, 250.00)
+                )
+        );
+
+        SnackOrder order2 = buildOrder(
+                customer,
+                Instant.now().minus(1, ChronoUnit.HOURS),
+                List.of(
+                        new OrderLineItem("S007", "Candy", 3, 100.00),
+                        new OrderLineItem("S010", "Pizza Slice", 1, 600.00),
+                        new OrderLineItem("S006", "Water Bottle", 2, 150.00)
+                )
+        );
+
+        snackOrderRepository.save(order1);
+        snackOrderRepository.save(order2);
+    }
+
+    private static SnackOrder buildOrder(Customer customer, Instant placedAt, List<OrderLineItem> lines) {
+        double total = lines.stream().mapToDouble(OrderLineItem::getLineTotal).sum();
+
+        SnackOrder order = new SnackOrder();
+        order.setUserId(customer.getId());
+        order.setUsername(customer.getUserName());
+        order.setPlacedAt(placedAt);
+        order.setTotalAmount(total);
+        order.setItems(new ArrayList<>(lines));
+        return order;
     }
 }
