@@ -11,17 +11,19 @@ public class Movie {
     // Private attributes (Encapsulation)
     @Id
     private String movieId;
+    private String title;
     private String poster; // Stores the image path or URL
     private String summary;
-    private String showtimes; // E.g., "10:00 AM, 1:00 PM, 6:00 PM"
+    private String showtime; // E.g., "10:00 AM, 1:00 PM, 6:00 PM"
     private String theaterId;
 
     // Constructor to initialize the Movie object
-    public Movie(String movieId, String poster, String summary, String showtimes, String theaterId) {
+    public Movie(String movieId,String title , String poster, String summary, String showtime, String theaterId) {
         this.movieId = movieId;
+        this.title = title;
         this.poster = poster;
         this.summary = summary;
-        this.showtimes = showtimes;
+        this.showtime = showtime;
         this.theaterId = theaterId;
     }
 
@@ -37,6 +39,14 @@ public class Movie {
 
     public void setMovieId(String movieId) {
         this.movieId = movieId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getPoster() {
@@ -56,11 +66,11 @@ public class Movie {
     }
 
     public String getShowtimes() {
-        return showtimes;
+        return showtime;
     }
 
     public void setShowtimes(String showtimes) {
-        this.showtimes = showtimes;
+        this.showtime = showtimes;
     }
 
     public String getTheaterId() {
@@ -74,6 +84,6 @@ public class Movie {
     // Optional: Override toString() for easier debugging later
     @Override
     public String toString() {
-        return movieId + "," + poster + "," + summary + "," + showtimes + "," + theaterId;
+        return movieId + "," + poster + "," + summary + "," + showtime + "," + theaterId;
     }
 }
