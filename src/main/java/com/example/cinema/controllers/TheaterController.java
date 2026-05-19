@@ -3,10 +3,14 @@ import com.example.cinema.models.Seat;
 import com.example.cinema.models.Theater;
 import com.example.cinema.services.SeatService;
 import com.example.cinema.services.TheaterService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -83,12 +87,9 @@ import java.util.TreeMap;
         public String updateTheater(@RequestParam String id,
                                     @RequestParam String name,
                                     @RequestParam String location,
-                                    @RequestParam int capacity,
-                                    @RequestParam int screenCount,
-                                    @RequestParam(defaultValue = "false") boolean hasAC,
-                                    @RequestParam String theaterType) {
-            boolean ok = theaterService.updateTheater(id, name, location,
-                    capacity, screenCount, hasAC, theaterType);
+                                    @RequestParam int capacity) {
+            // Form may still send extra fields; service only persists Theater model fields
+            boolean ok = theaterService.updateTheater(id, name, location, capacity);
             if (ok) return "redirect:/theater/list?msg=Theater updated";
             return "redirect:/theater/list?error=Update failed";
         }
@@ -212,5 +213,99 @@ import java.util.TreeMap;
                                  @RequestParam String theaterId) {
             seatService.deleteSeat(seatId);
             return "redirect:/seat/map?theaterId=" + theaterId + "&msg=Seat deleted";
+        }
+
+        // ══════════════════════════════════════════════
+        //  REST API — static HTML pages (theaters.html, seats.html)
+        // ══════════════════════════════════════════════
+
+        /** GET /api/theaters — list all theaters (optional ?search=) with seat stats for UI cards */
+        @GetMapping("/api/theaters")
+        @ResponseBody
+        public List<Map<String, Object>> apiListTheaters(@RequestParam(required = false) String search) {
+            List<Theater> theaters;
+            if (search != null && !search.trim().isEmpty()) {
+                theaters = theaterService.searchByName(search);
+            } else {
+                theaters = theaterService.getAllTheaters();
+            }
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (Theater t : theaters) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("id", t.getId());
+                row.put("name", t.getName());
+                row.put("location", t.getLocation());
+                row.put("capacity", t.getCapacity());
+                row.put("availableSeats", theaterService.getAvailableSeats(t.getId()));
+                row.put("reservedSeats", theaterService.getReservedSeats(t.getId()));
+                result.add(row);
+            }
+            return result;
+        }
+
+        /** GET /api/theaters/{id} — single theater with seat stats */
+        @GetMapping("/api/theaters/{id}")
+        @ResponseBody
+        public ResponseEntity<Map<String, Object>> apiGetTheater(@PathVariable String id) {
+            Theater theater = theaterService.getTheaterById(id);
+            if (theater == null) {
+                return ResponseEntity.notFound().build();
+            }
+            Map<String, Object> body = new HashMap<>();
+            body.put("id", theater.getId());
+            body.put("name", theater.getName());
+            body.put("location", theater.getLocation());
+            body.put("capacity", theater.getCapacity());
+            body.put("availableSeats", theaterService.getAvailableSeats(id));
+            body.put("reservedSeats", theaterService.getReservedSeats(id));
+            return ResponseEntity.ok(body);
+        }
+
+        /** GET /api/seats?theaterId=T001 — seats for seat map UI */
+        @GetMapping("/api/seats")
+        @ResponseBody
+        public ResponseEntity<List<Seat>> apiGetSeats(@RequestParam String theaterId) {
+            if (theaterService.getTheaterById(theaterId) == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(seatService.getSeatsByTheater(theaterId));
+        }
+
+        /** POST /api/seats/{seatId}/reserve — toggle reserve for static UI */
+        @PostMapping("/api/seats/{seatId}/reserve")
+        @ResponseBody
+        public ResponseEntity<Map<String, Object>> apiReserveSeat(@PathVariable String seatId) {
+            Seat seat = seatService.getSeatById(seatId);
+            if (seat == null) {
+                return ResponseEntity.notFound().build();
+            }
+            boolean ok = seat.isAvailable()
+                    ? seatService.reserveSeat(seatId)
+                    : seatService.releaseSeat(seatId);
+            Seat updated = seatService.getSeatById(seatId);
+            Map<String, Object> body = new HashMap<>();
+            body.put("success", ok);
+            body.put("status", updated != null ? updated.getStatus() : null);
+            return ok ? ResponseEntity.ok(body) : ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+        }
+
+        /**
+         * POST /api/seats/{seatId}/book — reserve only (used after booking confirmation).
+         * Avoids accidental release if the client calls the endpoint twice.
+         */
+        @PostMapping("/api/seats/{seatId}/book")
+        @ResponseBody
+        public ResponseEntity<Map<String, Object>> apiBookSeat(@PathVariable String seatId) {
+            Seat seat = seatService.getSeatById(seatId);
+            if (seat == null) {
+                return ResponseEntity.notFound().build();
+            }
+            boolean ok = seatService.reserveSeat(seatId);
+            Seat updated = seatService.getSeatById(seatId);
+            Map<String, Object> body = new HashMap<>();
+            body.put("success", ok);
+            body.put("status", updated != null ? updated.getStatus() : null);
+            return ok ? ResponseEntity.ok(body)
+                    : ResponseEntity.status(HttpStatus.CONFLICT).body(body);
         }
     }
