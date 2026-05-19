@@ -9,14 +9,12 @@ import java.util.stream.Collectors;
     public class TheaterService {
 
         // CREATE
-        public String addTheater(String name, String location, int capacity,
-                                 int screenCount, boolean hasAC, String theaterType) {
-            if (name == null || name.trim().isEmpty()) return null;
-            if (capacity <= 0 || screenCount <= 0)    return null;
+        public String addTheater(String name, String location, int capacity) {
+            if (name == null || name.trim().isEmpty())
+                return null;
 
             String id = FileHandler.generateTheaterId();
-            Theater t = new Theater(id, name.trim(), location.trim(),
-                    capacity, screenCount, hasAC, theaterType);
+            Theater t = new Theater(id, name.trim(), location.trim(), capacity);
             FileHandler.appendTheater(t);
             return id;
         }
@@ -49,9 +47,6 @@ import java.util.stream.Collectors;
             t.setName(name);
             t.setLocation(location);
             t.setCapacity(capacity);
-            t.setScreenCount(screenCount);
-            t.setHasAC(hasAC);
-            t.setTheaterType(theaterType);
             return FileHandler.updateTheater(t);
         }
 
