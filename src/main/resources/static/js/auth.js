@@ -111,3 +111,14 @@ const AuthService = (function () {
         login
     };
 })();
+
+/**
+ * Shared nav helper: sends user to the correct Snacks page (customer vs admin).
+ * @param {Event} [event] optional — call preventDefault when used from &lt;a href="#"&gt;
+ */
+function goSnacksNav(event) {
+    if (event) {
+        event.preventDefault();
+    }
+    window.location.href = AuthService.getSnacksPageUrl();
+}
