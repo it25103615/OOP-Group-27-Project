@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theaters — QuickShow</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+    <a href="/index.html" class="logo"><span>Q</span>uickShow</a>
+    <nav class="nav-main" aria-label="Primary">
+        <a href="/index.html">Home</a>
+        <a href="/index.html#now-showing">Movies</a>
+        <a href="/theaters.html" class="active">Theaters</a>
+        <a href="/index.html#releases">Releases</a>
+        <a href="#" onclick="goSnacksNav(event)">Snacks</a>
+    </nav>
+    <div class="header-actions">
+        <a href="/index.html" class="btn btn-ghost">Account home</a>
+    </div>
+</header>
+
+<main class="container">
+    <h1 class="page-title">Explore Theaters</h1>
+    <p class="page-subtitle">Choose a venue, then pick a show date, movie, and seats.</p>
+
+    <section class="search-bar">
+        <input type="search" id="theater-search" placeholder="Search by name or location…" aria-label="Search theaters">
+        <button type="button" class="btn btn-brand" id="search-btn">Search</button>
+    </section>
+
+    <p id="loading" class="loading">Loading theaters…</p>
+    <p id="error" class="message error hidden"></p>
+    <section id="theater-grid" class="theater-grid"></section>
+</main>
+
+<script src="/js/auth.js"></script>
+<script src="/js/cinema-theater.js"></script>
+<script>
+    const grid = document.getElementById('theater-grid');
+    const loading = document.getElementById('loading');
+    const errorEl = document.getElementById('error');
+    const searchInput = document.getElementById('theater-search');
+
+    async function renderTheaters(search) {
+        loading.classList.remove('hidden');
+        errorEl.classList.add('hidden');
+        grid.innerHTML = '';
+
+        try {
+            const theaters = await CinemaTheater.loadTheaters(search);
+            loading.classList.add('hidden');
+
+            if (!theaters.length) {
+                grid.innerHTML = '<p class="message">No theaters found.</p>';
+                return;
+            }
+
+            theaters.forEach(function (t, i) {
+                const available = t.availableSeats != null ? t.availableSeats : '—';
+                const card = document.createElement('article');
+                card.className = 'theater-card';
+                card.innerHTML =
+                    '<img src="' + CinemaTheater.theaterImage(i) + '" alt="">' +
+                    '<section class="theater-card-body">' +
+                    '<h2>' + escapeHtml(t.name) + '</h2>' +
+                    '<p class="location">' + escapeHtml(t.location || '') + '</p>' +
+                    '<section class="theater-card-footer">' +
+                    '<span class="stat-badge">Capacity: <strong>' + t.capacity + '</strong>' +
+                    ' · Available: <strong>' + available + '</strong></span>' +
+                    '<a href="/seats.html?theaterId=' + encodeURIComponent(t.id) + '" class="btn btn-brand">View Seats</a>' +
+                    '</section></section>';
+                grid.appendChild(card);
+            });
+        } catch (err) {
+            loading.classList.add('hidden');
+            errorEl.textContent = 'Could not load theaters. ' + err.message;
+            errorEl.classList.remove('hidden');
+        }
+    }
+
+    function escapeHtml(text) {
+        const el = document.createElement('span');
+        el.textContent = text;
+        return el.innerHTML;
+    }
+
+    document.getElementById('search-btn').addEventListener('click', function () {
+        renderTheaters(searchInput.value.trim());
+    });
+    searchInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') renderTheaters(searchInput.value.trim());
+    });
+
+    renderTheaters();
+</script>
+</body>
+</html>
