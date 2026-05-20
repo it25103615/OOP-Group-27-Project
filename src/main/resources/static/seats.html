@@ -56,7 +56,7 @@
                 </select>
             </div>
         </div>
-        <p style="margin-top:1rem;color:var(--muted);font-size:0.85rem;">Each movie has its own time slots. After you confirm seats, sign in or register to complete your booking.</p>
+        <p style="margin-top:1rem;color:var(--muted);font-size:0.85rem;">Choose a date and time slot, then continue to payment after seat selection.</p>
         <button type="button" class="btn btn-brand" style="margin-top:1rem" id="btn-to-seats">Continue to seat map</button>
     </section>
 
@@ -77,11 +77,11 @@
 
 <footer class="selection-panel hidden" id="selection-panel">
     <p id="selection-text">Select seats on the map.</p>
-    <button type="button" class="btn btn-brand" id="confirm-btn" disabled>Confirm booking</button>
+    <button type="button" class="btn btn-brand" id="confirm-btn" disabled>Confirm Seats</button>
 </footer>
 
 <!-- After confirm: require login / register (uses same session as snacks checkout) -->
-<div id="auth-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+<div id="auth-modal-removed" class="hidden" style="display:none">
     <div class="modal-card">
         <h2 id="auth-title">Complete your booking</h2>
         <p class="hint">Already registered? Sign in below. New user? Use Register, then return here and sign in.</p>
@@ -112,9 +112,8 @@
     const selectionText = document.getElementById('selection-text');
     const confirmBtn = document.getElementById('confirm-btn');
     const bookingSummary = document.getElementById('booking-summary');
-    const authModal = document.getElementById('auth-modal');
-
     let seatsById = {};
+    let theaterName = '';
     let selectedIds = [];
     let numTickets = 2;
     let bookingCtx = {};
@@ -164,6 +163,7 @@
     async function initTheater() {
         try {
             const theater = await CinemaTheater.loadTheater(theaterId);
+            theaterName = theater.name;
             document.getElementById('theater-name').textContent = theater.name;
             document.getElementById('theater-location').textContent = theater.location || '';
             loading.classList.add('hidden');
@@ -326,73 +326,34 @@
 
     confirmBtn.addEventListener('click', function () {
         if (selectedIds.length !== numTickets) return;
-        if (AuthService.isAuthenticated()) {
-            completeBookingAfterAuth();
-        } else {
-            openAuthModal();
-        }
+
+        const labels = selectedIds.map(function (id) {
+            return CinemaTheater.formatSeatLabelShort(seatsById[id]);
+        });
+        let total = 0;
+        selectedIds.forEach(function (id) {
+            total += Number(seatsById[id].price) || 0;
+        });
+
+        const user = typeof AuthService !== 'undefined' ? AuthService.getCurrentUser() : null;
+
+        CinemaBooking.savePendingBooking({
+            theaterId: theaterId,
+            theaterName: theaterName,
+            movieTitle: bookingCtx.movieTitle,
+            movieId: bookingCtx.movieId,
+            showDate: bookingCtx.date,
+            showDateDisplay: CinemaBooking.formatDisplayDate(bookingCtx.date),
+            showTime: bookingCtx.time,
+            seatIds: selectedIds.slice(),
+            seatLabels: labels.join(', '),
+            ticketCount: numTickets,
+            totalAmount: total,
+            username: user ? user.username : null
+        });
+
+        window.location.href = '/payment.html';
     });
-
-    function currentReturnUrl() {
-        return window.location.pathname + window.location.search;
-    }
-
-    function openAuthModal() {
-        document.getElementById('modal-register-link').href =
-            '/register.html?next=' + encodeURIComponent(currentReturnUrl());
-        document.getElementById('modal-username').value = '';
-        document.getElementById('modal-password').value = '';
-        authModal.classList.remove('hidden');
-    }
-
-    function closeAuthModal() {
-        authModal.classList.add('hidden');
-    }
-
-    document.getElementById('modal-cancel-btn').addEventListener('click', closeAuthModal);
-
-    document.getElementById('modal-login-btn').addEventListener('click', async function () {
-        const u = document.getElementById('modal-username').value.trim();
-        const p = document.getElementById('modal-password').value;
-        const result = await AuthService.login(u, p);
-        if (!result.ok) {
-            alert(result.error);
-            return;
-        }
-        closeAuthModal();
-        await completeBookingAfterAuth();
-    });
-
-    async function completeBookingAfterAuth() {
-        confirmBtn.disabled = true;
-        const booked = [];
-        try {
-            for (let i = 0; i < selectedIds.length; i++) {
-                await CinemaTheater.bookSeat(selectedIds[i]);
-                booked.push(selectedIds[i]);
-            }
-            const summary =
-                bookingCtx.movieTitle + ' on ' + bookingCtx.date + ' at ' + bookingCtx.time +
-                ' — ' + booked.length + ' seat(s).';
-            try {
-                sessionStorage.setItem('lastBookingSummary', summary);
-            } catch (ignore) {}
-            alert('Booking confirmed!\n' + summary);
-            window.location.reload();
-        } catch (err) {
-            for (let j = 0; j < booked.length; j++) {
-                try {
-                    await CinemaTheater.toggleReserve(booked[j]);
-                } catch (ignore2) {}
-            }
-            alert(
-                err.message ||
-                    'Could not reserve all seats. If the app is offline, start Spring Boot so seats save to disk.'
-            );
-        } finally {
-            confirmBtn.disabled = false;
-        }
-    }
 })();
 </script>
 </body>
