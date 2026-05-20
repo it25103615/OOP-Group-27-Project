@@ -141,8 +141,18 @@ const CinemaTheater = (function () {
             'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1200&auto=format&fit=crop',
             'https://images.unsplash.com/photo-1574267432553-e623176c1d93?q=80&w=1200&auto=format&fit=crop',
             'https://images.unsplash.com/photo-1598899134739-24c46f58b8c9?q=80&w=1200&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=1200&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1524985069026-dd778a1c3f8c?q=80&w=1200&auto=format&fit=crop'
+            '/images/modern-home-theater-with-plush-seating-and-ambient-lighting-free-photo.jfif',
+            'https://images.unsplash.com/photo-1524985069026-dd778a1c3f8c?q=80&w=1200&auto=format&fit=crop',
+            '/images/ChatGPT Image May 20, 2026, 10_44_59 AM.png',
+            '/images/ChatGPT Image May 20, 2026, 10_51_00 AM.png',
+            '/images/ChatGPT Image May 20, 2026, 10_54_09 AM.png',
+            '/images/Gemini_Generated_Image_ihpj8iihpj8iihpj.png',
+            '/image/ChatGPT Image May 20, 2026, 08_36_55 PM.png',
+            '/image/ChatGPT Image May 20, 2026, 08_40_57 PM.png',
+            '/image/ChatGPT Image May 20, 2026, 08_42_43 PM.png',
+            '/image/Galaxy-Theatres-DFX-Auditorium-1024x560.jpg',
+            '/image/pngtree-empty-movie-theater-with-rows-of-vacant-red-seats-leading-to-image_19255538.webp',
+
         ];
         return imgs[index % imgs.length];
     }
