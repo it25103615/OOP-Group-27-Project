@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuickShow — User Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
@@ -27,15 +28,15 @@
     <a href="index.html" class="flex items-center space-x-2">
         <span class="text-2xl font-bold tracking-wider mono"><span class="text-brand">Q</span>uickShow</span>
     </a>
-	
+
     <div class="flex flex-col items-center gap-1">
         <span class="text-xs text-white/75 mono uppercase tracking-widest">Admin Panel</span>
         <!-- Dropdown -->
         <div class="relative">
-            <button 
+            <button
 				class="text-xs text-brand mono flex items-center gap-1 cursor-pointer"
 				onclick="document.getElementById('admin-dropdown').classList.toggle('hidden')"
-			>	
+			>
                 Users
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
@@ -49,7 +50,7 @@
             </div>
         </div>
     </div>
-	
+
     <a href="index.html" class="text-sm text-white/75 hover:text-white transition flex items-center gap-2">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
         Back to site
@@ -97,25 +98,25 @@
     <!-- Tabs + Search -->
     <div class="flex items-center justify-between mb-6">
         <div class="flex gap-6 rounded-full bg-cardbg px-4 py-2">
-            <button 
-				onclick="switchTab('all')" 
-				id="tab-all" 
+            <button
+				onclick="switchTab('all')"
+				id="tab-all"
 				data-active="true"
 				class="text-sm font-medium rounded-full transition mono px-3 py-1 data-[active=true]:bg-white/10 data-[active=true]:text-white text-white/40"
 			>
 				All
 			</button>
-			<button 
-				onclick="switchTab('customer')" 
-				id="tab-customer" 
+			<button
+				onclick="switchTab('customer')"
+				id="tab-customer"
 				data-active="false"
 				class="text-sm font-medium rounded-full transition mono px-3 py-1 data-[active=true]:bg-white/10 data-[active=true]:text-white text-white/40"
 			>
 				Customers
 			</button>
-			<button 
-				onclick="switchTab('admin')" 
-				id="tab-admin" 
+			<button
+				onclick="switchTab('admin')"
+				id="tab-admin"
 				data-active="false"
 				class="text-sm font-medium rounded-full transition mono px-3 py-1 data-[active=true]:bg-white/10 data-[active=true]:text-white text-white/40"
 			>
@@ -166,7 +167,7 @@
             </button>
         </div>
 
-        <div class="space-y-4">
+        <div id="create-user-modal" class="space-y-4">
             <div>
                 <label class="block text-xs text-white/40 mono uppercase tracking-widest mb-2">Username</label>
                 <input type="text" id="create-username" placeholder="e.g. john_doe"
@@ -206,6 +207,7 @@
     let currentTab = 'all'; //Which filter is currently active
     let createType = 'customer'; //Sets the customer type about to be created
     const user = JSON.parse(sessionStorage.getItem('user'));
+    let updatingUser = {};
 
     // === Fetch all the users - Start ===
     async function loadUsers() {
@@ -234,18 +236,18 @@
 	// === Render the table to show users - Start ===
     function renderTable() {
         const search = document.getElementById('search-input').value.toLowerCase(); //Get the search input field from the page
-		
+
 		//Filter users shown in the table based on the current filter tab selected and username entered into the search field
         let filtered = allUsers.filter(u => {
 			//Create a matchTab variable and assign it a boolean value based on certain criteria
             const matchTab = currentTab === 'all' //Is the current filter tab "All"
                 || (currentTab === 'admin' && u.type === 'ADMIN') //Is the current filter tab "admin" AND is the user of type "Admin"
                 || (currentTab === 'customer' && u.type === 'CUSTOMER'); //Is the current filter tab "customer" AND is the user not of type "Admin:
-            
+
 			//Create a matchSearch variable and assign it a boolean value based on certain criteria
 			const matchSearch = !search //Is the search input field empty
 				|| u.username.toLowerCase().includes(search); //Does the user's username include the string entered into the search field
-            
+
 			return matchTab && matchSearch;
         });
 
@@ -265,11 +267,19 @@
                         ${u.type}
                     </span>
                 </td>
-                <td class="px-6 py-4 text-sm text-white/30 mono">${u.id ?? '—'}</td>
+                <td class="px-6 py-4 text-sm text-white mono">${u.id ?? '—'}</td>
                 <td class="px-6 py-4 text-right">
-                    <button onclick="deleteUser('${u.id}', '${u.username}')"
-                        class="text-xs text-white/20 hover:text-brand transition px-3 py-1 rounded-lg hover:bg-brand/10">
-                        Remove
+					<button
+						onclick="updateUser('${u.id}')"
+						class = "text-xs text-white/75 hover:text-brand transition px-3 py-1 rounded-lg hover:bg-brand/10"
+					>
+						<i class="fa-solid fa-pen-to-square"></i>
+					</button>
+                    <button
+						onclick="deleteUser('${u.id}', '${u.username}')"
+                        class="text-xs text-white/75 hover:text-brand transition px-3 py-1 rounded-lg hover:bg-brand/10"
+					>
+                        <i class="fa-solid fa-trash"></i>
                     </button>
                 </td>
             </tr>
@@ -290,34 +300,60 @@
 	// === Filtering Users (including search) - End ===
 
     // === Open the User creation Modal - Start ===
-    function openCreateModal(type) {
-        createType = type; //Set the type of user being made
-        document.getElementById('modal-title').textContent = type === 'admin' ? 'Create Admin' : 'Create User'; //Set the title of the popup
-		 
-		//Make sure the input fields are blank
-        document.getElementById('create-username').value = '';
-        document.getElementById('create-password').value = '';
-        
+    function openCreateModal(operationType, userData={}) {
+        const { username = '', password = '', id: userID = '', type = '' } = userData;
+        updatingUser = userData;
+        createType = operationType; //Set the type of user being made
+        document.getElementById('modal-title').textContent = (operationType === 'admin' ? 'Create Admin' : (operationType === 'update' ? 'Update User' : 'Create User')); //Set the title of the popup
+
+        if (operationType === 'update') {
+            document.getElementById('create-username').value = username;
+            document.getElementById('create-password').value = password;
+            document.getElementById('create-submit-btn').textContent = 'Update';
+        } else {
+            document.getElementById('create-username').value = '';
+            document.getElementById('create-password').value = '';
+            document.getElementById('create-submit-btn').textContent = 'Create';
+        }
+
+        // Show/hide checkbox
+        const existing = document.getElementById('update-checkbox-wrapper');
+        if (existing) existing.remove();
+
+        if (operationType === 'update') {
+            const wrapper = document.createElement('div');
+            wrapper.id = 'update-checkbox-wrapper';
+            wrapper.innerHTML = `
+            <label class="flex items-center gap-2 text-xs text-white/50 mono cursor-pointer">
+                <input type="checkbox" id="update-checkbox" class="accent-brand" />
+                User type is Admin:
+            </label>
+        `;
+            document.getElementById('create-user-modal').appendChild(wrapper);
+            document.getElementById('update-checkbox').checked = (type === 'ADMIN');
+        }
+
 		document.getElementById('create-error').classList.add('hidden'); //Make sure the error message is hidden
-		
+
         document.getElementById('create-modal').classList.remove('hidden'); //Make the popup visible
     }
 
 	// === Close / Hide the user creation popup - Start ===
     function closeCreateModal() {
         document.getElementById('create-modal').classList.add('hidden');
+        updatingUser = {};
     }
 	// === Close / Hide the user creation popup - End ===
 
-	// === Submit the new user data to create and save the user in the database - Start === 
+	// === Submit the new user data to create and save the user in the database - Start ===
     async function submitCreate() {
 		//Get the username and password from the input fields and remove any leading or trailing whitespace
         const username = document.getElementById('create-username').value.trim();
         const password = document.getElementById('create-password').value.trim();
-		
+
 		//Get the HTML tag we will use to display any error messages
         const err = document.getElementById('create-error');
-		
+
 		//Get the button the used to submit the data (used later to show loading)
         const btn = document.getElementById('create-submit-btn');
 
@@ -326,30 +362,44 @@
             showError(err, 'Username and password are required.');
             return;
         }
-		
-		//Display a spinner and disable the button while the API calls are being made
-        btn.innerHTML = '<div class="spinner"></div>';
+
+		//Disable the button while the API calls are being made
         btn.disabled = true;
 
 		//Create a variable "endpoint" that will hold the API link
 		//	It uses the createType variable to decide if the API should register a customer or an admin
-        const endpoint = createType === 'admin'
+        const endpoint = (createType === 'admin'
             ? '/api/users/register/admin'
-            : '/api/users/register';
-        
+            : (createType === 'update'
+                ? '/api/users/update'
+                : '/api/users/register')
+            );
+
 		try { //Try to send data to the API
-			//POST the data to the API
+            const creatorID = user.userId;
+
+            const body = createType === 'update'
+                ? { userID: updatingUser.id, newUsername: username, newPassword: password, makeAdmin: document.getElementById('update-checkbox').checked }
+                : createType === 'admin'
+                    ? { username, password, creatorID }
+                    : { username, password };
+
+            //POST or PUT (update) the data to the API
             const res = await fetch(endpoint, {
-                method: 'POST',
+                method: createType === 'update' ? 'PUT' : 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify(body),
             });
-			
+
             const data = await res.json(); //Save the response
-			
+
             if (res.ok) {//If the response was OK
                 closeCreateModal(); //Close the user creation popup
-                showToast(`✓ ${createType === 'admin' ? 'Admin' : 'User'} "${username}" created.`, 'success'); //Show a small popup stating the user was made successfully
+                if(createType === 'update') {
+                    showToast(`✓ ${username} was successfully updated`, 'success');
+                } else {
+                    showToast(`✓ ${createType === 'admin' ? 'Admin' : 'User'} "${username}" created.`, 'success'); //Show a small popup stating the user was made successfully
+                }
                 await loadUsers(); //Reload all the users
             } else { //Otherwise
 				//Inform the user using an appropriate error message
@@ -359,10 +409,9 @@
             showError(err, 'Network error.'); //Inform the user that there was a network issue
         }
 
-        btn.innerHTML = 'Create'; //Reset the button to it's initial state
         btn.disabled = false; //Enable the button
     }
-	// === Submit the new user data to create and save the user in the database - Start === 
+	// === Submit the new user data to create and save the user in the database - Start ===
 
     // === Delete User - Start ===
     async function deleteUser(userID, username) {
@@ -374,7 +423,7 @@
 
         //Make sure the user to remove is the correct one
         if (!confirm(`Remove user "${username}"?`)) return;
-		
+
 		//Try to make an API call to delete the user
         try {
 			//Send a DELETE request to the API endpoint
@@ -383,7 +432,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({userID}),
             });
-			
+
             if (res.ok) { //If the response was OK
                 showToast(`Removed user "${username}".`, 'neutral'); //Inform the user that the operation was successful
                 await loadUsers(); //Reload all the users
@@ -396,32 +445,47 @@
     }
 	// === Delete User - End ===
 
+	async function updateUser(userID) {
+        const res = await fetch(`/api/users/userid`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({userID}),
+        });
+
+        if (res.ok) {
+            let focusUser = await res.json();
+            openCreateModal('update', focusUser);
+        } else {
+            showToast('Failed to find user.', 'error');
+        }
+    }
+
     // === Helper Functions - Start ===
-	//	Functions to provide utility for other functions 
-	
+	//	Functions to provide utility for other functions
+
 	//Function to edit an HTML tag to display an error message
     function showError(element, msg) {
         element.textContent = msg; //Set the text of the HTML element to the message
         element.classList.remove('hidden'); //Make the HTML element visible
     }
-	
+
 	// === Function to display a small popup to inform the user of something
     function showToast(msg, type = 'success') {
-		//Get the HTML tags for the toast popup such as 
+		//Get the HTML tags for the toast popup such as
         const toast = document.getElementById('toast'); // the popup iteself
         const icon = document.getElementById('toast-icon'); //the icon of the popup
         const msgEl = document.getElementById('toast-msg'); //the text section of the popup
-		
+
 		//Set the icon and style to be used
         icon.textContent = type === 'success' ? '✓' : type === 'error' ? '✕' : '·';
         icon.className = `text-base ${type === 'success' ? 'text-green-400' : type === 'error' ? 'text-brand' : 'text-white/40'}`;
-		
+
 		//Set the message to show to the user
         msgEl.textContent = msg;
-		
+
 		//Make the popup visible
         toast.classList.remove('hidden');
-		
+
 		//Make sure the popup disappears after some time (3000ms = 3seconds)
         setTimeout(() => toast.classList.add('hidden'), 3000);
     }
@@ -429,7 +493,7 @@
 
 	// === Event Listeners - Start ===
 	//	Monitoring for certain actions done by the user such as clicking somewhere or pressing a certain keyboard key
-	
+
     // Close modal on backdrop click
     document.getElementById('create-modal').addEventListener('click', function(e) {
         if (e.target === this) closeCreateModal();
@@ -441,7 +505,7 @@
             submitCreate();
         }
     });
-	
+
 	// Close dropdown on backdrop click
 	document.addEventListener('click', e => {
 		if (!e.target.closest('.relative')) {

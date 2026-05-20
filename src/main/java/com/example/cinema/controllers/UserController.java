@@ -13,7 +13,9 @@ import com.example.cinema.repositories.CustomerRepository;
 // === Imports Specific to Controller ===
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import jakarta.persistence.EntityManager;
 
 // === Normal Java Imports ===
 import java.util.List;
@@ -36,12 +38,26 @@ class UserController {
     @Autowired private AdminRepository adminRepository; // access to the admins table
     @Autowired private CustomerRepository customerRepository; //access to the customers table
 
+    @Autowired private EntityManager entityManager; //Access to a system to delete created objects
+
     //Get all users
     // Returns a list of ALL the users in the database (i.e. Admins AND Customers)
     @GetMapping // /api/users
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+	
+	//Get a specific user by ID
+	//	Returns the entry of a specified user
+	@PostMapping("/userid")
+    public ResponseEntity<?> getUser(@RequestBody Map<String, String> body) {
+        Long id = Long.valueOf(body.get("userID"));
+        if (!userRepository.existsById(id)) {
+			return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+		} else {
+			return ResponseEntity.ok(userRepository.findById(id).get());
+		}
+	}
 
     //Get all the customers
     // Returns a list of all the users with role CUSTOMER in the database
@@ -109,6 +125,7 @@ class UserController {
     //      If not then return an error with an appropriate message
     @PostMapping("/register/admin")
     public ResponseEntity<?> registerAdmin(@RequestBody Map<String, String> body){
+        System.out.println(body);
         String newUserName = (body.get("username")).strip(); // extract the new username from the request body
         String newPassword = (body.get("password")).strip(); // extract the new password from the request body
         Long userIDofPersonMakingAdmin = Long.valueOf(body.get("creatorID")); //extract the userId of the person making the admin account
@@ -139,5 +156,65 @@ class UserController {
         }
         userRepository.deleteById(id);
         return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
+    }
+
+    @Transactional //Forces all database actions in the method to be done in a single session
+    @PutMapping("/update")
+    public ResponseEntity<?> updateUser(@RequestBody Map<String, String> body) {
+        Long id = Long.valueOf(body.get("userID"));
+
+        if (!userRepository.existsById(id)) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+
+        User user = userRepository.findById(id).get();
+
+        if (body.containsKey("newUsername")) {
+            String newUsername = body.get("newUsername").strip();
+            if( !(user.getUsername().equals(newUsername)) ){
+                if (newUsername.contains(" ")) {
+                    return ResponseEntity.badRequest().body(Map.of("error", "Username cannot contain spaces"));
+                }
+                if (userRepository.findByUsername(newUsername).isPresent()) {
+                    return ResponseEntity.badRequest().body(Map.of("error", "Username already exists"));
+                }
+                user.setUsername(newUsername);
+            }
+        }
+
+        if(body.containsKey("newPassword")) {
+            String newPassword = body.get("newPassword").strip();
+            if( !(user.getPassword().equals(newPassword)) ){
+                user.setPassword(newPassword);
+            }
+        }
+
+        userRepository.save(user);
+        userRepository.flush(); // force the save to commit before moving on
+
+        if (body.containsKey("makeAdmin")) {
+            boolean makeAdmin = Boolean.parseBoolean(body.get("makeAdmin"));
+            boolean changedType = false;
+            String username = user.getUsername();
+            String password = user.getPassword();
+
+            if(user.getType().equals("CUSTOMER") && makeAdmin){
+                adminRepository.save(new Admin(username, password));
+                changedType = true;
+            } else if(user.getType().equals("ADMIN") && !makeAdmin){
+                customerRepository.save(new Customer(username, password));
+                changedType = true;
+            }
+
+            userRepository.flush(); // force any pending commits before moving on
+            if(changedType){ userRepository.deleteById(id); }
+
+            //update any tables that referenced the old ID below
+            //  ORDER HISTORY?
+            //  TICKETS?
+            //  SNACKS?
+        }
+
+        return ResponseEntity.ok(Map.of("message", "User updated successfully", "userID", user.getId()));
     }
 }
