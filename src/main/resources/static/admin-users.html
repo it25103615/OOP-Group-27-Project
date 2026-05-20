@@ -202,11 +202,12 @@
     <span id="toast-msg"></span>
 </div>
 
+<script src="/js/auth.js"></script>
 <script>
     let allUsers = []; //A list of all the users
     let currentTab = 'all'; //Which filter is currently active
     let createType = 'customer'; //Sets the customer type about to be created
-    const user = JSON.parse(sessionStorage.getItem('user'));
+    const user = AuthService.getCurrentUser();
     let updatingUser = {};
 
     // === Fetch all the users - Start ===
@@ -291,6 +292,7 @@
 	function switchTab(tab) {
 		document.querySelectorAll('[id^="tab-"]').forEach(btn => btn.dataset.active = "false");
 		document.getElementById('tab-' + tab).dataset.active = "true";
+        currentTab = tab;
 		renderTable();
 	}
 	// === Tab switching logic - End ===
@@ -396,9 +398,9 @@
             if (res.ok) {//If the response was OK
                 closeCreateModal(); //Close the user creation popup
                 if(createType === 'update') {
-                    showToast(`✓ ${username} was successfully updated`, 'success');
+                    showToast(`${username} was successfully updated`, 'success');
                 } else {
-                    showToast(`✓ ${createType === 'admin' ? 'Admin' : 'User'} "${username}" created.`, 'success'); //Show a small popup stating the user was made successfully
+                    showToast(`${createType === 'admin' ? 'Admin' : 'User'} "${username}" created.`, 'success'); //Show a small popup stating the user was made successfully
                 }
                 await loadUsers(); //Reload all the users
             } else { //Otherwise
@@ -514,7 +516,7 @@
 	});
 	// === Event Listeners - End ===
 
-    if(user.type === 'Admin') {
+    if( (user) && (user.type === 'Admin') ) {
         loadUsers(); //Initialize the page by loading all the users
     } else {
         alert("You must be an Admin to see this page")
