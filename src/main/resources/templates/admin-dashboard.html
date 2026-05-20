@@ -1,62 +1,119 @@
 <!DOCTYPE html>
+<!--
+  ADMIN MOVIE MANAGEMENT — admin-dashboard.html
+  GET /movies/dashboard → MovieController.showDashboard → MovieManager.getAllMoviesForAdmin
+-->
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard - Movies</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Movie Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
-                extend: { colors: { brand: '#3F000F', darkbg: '#0a0a0f', cardbg: '#161b28' } }
+                extend: {
+                    colors: {
+                        brand: '#ff4d6d',
+                        brandLight: '#A4133c',
+                        darkbg: '#000000',
+                        cardbg: '#141414',
+                        border: '#2a0a10'
+                    }
+                }
             }
         }
     </script>
+    <style>
+        body { background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(63,0,15,0.45), transparent), #000; }
+    </style>
 </head>
-<body class="bg-darkbg text-white font-sans min-h-screen p-10">
+<body class="bg-darkbg text-white font-sans min-h-screen antialiased">
 
-<div class="max-w-6xl mx-auto">
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold border-l-4 border-brand pl-4">Movies Dashboard</h1>
-        <a href="/movies/add" class="bg-brand hover:opacity-80 px-6 py-2 rounded-full font-semibold transition shadow-lg">
-            + Add New Movie
-        </a>
+<header class="border-b border-brand/40 bg-black/80 backdrop-blur sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <p class="text-xs uppercase tracking-widest text-gray-500">Admin Panel</p>
+            <h1 class="text-xl font-bold">Movie Management</h1>
+        </div>
+        <span id="admin-user-label" class="hidden text-sm text-gray-400 border border-brand/30 rounded-full px-4 py-1"></span>
+        <div class="flex gap-3">
+            <a href="/movies/list" class="text-sm text-gray-400 hover:text-white py-2">Public Movie List</a>
+            <a href="/" class="text-sm text-gray-400 hover:text-white py-2">Home</a>
+            <a href="/movies/add" class="bg-brand hover:bg-brandLight px-5 py-2 rounded-lg font-semibold transition">+ Add Movie</a>
+        </div>
     </div>
+</header>
 
-    <div class="bg-cardbg rounded-2xl p-6 shadow-2xl border border-gray-800">
-        <table class="w-full text-left border-collapse">
-            <thead>
-            <tr class="border-b border-brand text-gray-400">
-                <th class="py-3 px-4">Movie ID</th>
-                <th class="py-3 px-4">Poster</th>
-                <th class="py-3 px-4">Title</th>
-                <th class="py-3 px-4">Showtimes</th>
-                <th class="py-3 px-4">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="movie : ${movies}" class="border-b border-gray-800 hover:bg-white/5 transition">
-                <td class="py-4 px-4 text-brand font-bold" th:text="${movie.movieId}">MOV-123</td>
-                <td class="py-4 px-4">
-                    <img th:src="${movie.poster}" class="w-16 h-24 object-cover rounded-md shadow-md border border-gray-700" alt="Poster">
-                </td>
-                <td class="py-4 px-4">
-                    <div class="font-bold text-lg text-white" th:text="${movie.title}">Movie Title</div>
-                    <div class="text-sm text-gray-500 mt-1" th:text="${movie.summary}">Summary...</div>
-                </td>
-                <td class="py-4 px-4 text-sm text-gray-400" th:text="${movie.showtimes}">10:00 AM</td>
-                <td class="py-4 px-4">
-                    <div class="flex space-x-4">
-                        <a th:href="@{/movies/view/{id}(id=${movie.movieId})}" class="text-blue-400 hover:text-blue-300 transition">View</a>
-                        <a th:href="@{/movies/edit/{id}(id=${movie.movieId})}" class="text-green-400 hover:text-green-300 transition">Edit</a>
+<main class="max-w-7xl mx-auto px-6 py-10">
+    <div th:if="${success}" class="mb-6 rounded-lg border border-green-800/50 bg-green-950/40 text-green-400 px-4 py-3 text-sm" th:text="${success}"></div>
+    <div th:if="${error}" class="mb-6 rounded-lg border border-red-800/50 bg-red-950/30 text-red-400 px-4 py-3 text-sm" th:text="${error}"></div>
+
+    <section class="bg-cardbg border border-border rounded-2xl overflow-hidden">
+        <div class="px-6 py-5 border-b border-brand/30 bg-gradient-to-r from-brand/20 to-transparent flex justify-between items-center">
+            <h2 class="text-lg font-semibold">All Movies (CRUD)</h2>
+            <span class="text-xs font-mono text-brand border border-brand/40 px-3 py-1 rounded-full"
+                  th:text="${#lists.size(movies)} + ' title(s)'">0</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                <tr class="text-xs uppercase text-gray-500 bg-black/50 border-b border-brand/20">
+                    <th class="py-4 px-6">ID</th>
+                    <th class="py-4 px-6">Poster</th>
+                    <th class="py-4 px-6">Details</th>
+                    <th class="py-4 px-6">Genre</th>
+                    <th class="py-4 px-6">Showtimes</th>
+                    <th class="py-4 px-6 text-right">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="movie : ${movies}" class="border-b border-white/5 hover:bg-brand/5">
+                    <td class="py-4 px-6 font-mono text-sm text-brand" th:text="${movie.movieId}">MOV-1</td>
+                    <td class="py-4 px-6"><img th:src="${movie.poster}" class="w-14 h-20 object-cover rounded border border-brand/30" alt=""></td>
+                    <td class="py-4 px-6 max-w-xs">
+                        <div class="font-semibold" th:text="${movie.title}">Title</div>
+                        <p class="text-sm text-gray-500 line-clamp-2" th:text="${movie.summary}">Summary</p>
+                    </td>
+                    <td class="py-4 px-6 text-sm text-brand" th:text="${movie.genre}">Action</td>
+                    <td class="py-4 px-6 text-sm text-gray-300" th:text="${movie.showtime}">10:00</td>
+                    <td class="py-4 px-6 text-right space-x-2">
+                        <a th:href="@{/movies/view/{id}(id=${movie.movieId})}" class="text-xs px-3 py-1.5 border border-gray-600 rounded hover:text-white">View</a>
+                        <a th:href="@{/movies/edit/{id}(id=${movie.movieId})}" class="text-xs px-3 py-1.5 bg-brand rounded hover:bg-brandLight">Update</a>
                         <form th:action="@{/movies/delete/{id}(id=${movie.movieId})}" method="post" class="inline">
-                            <button type="submit" class="text-red-500 hover:text-red-400 transition" onclick="return confirm('Are you sure you want to delete this movie?')">Delete</button>
+                            <button type="submit" class="text-xs px-3 py-1.5 border border-red-900 text-red-400 rounded hover:bg-red-950"
+                                    onclick="return confirm('Delete this movie?')">Delete</button>
                         </form>
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(movies)}">
+                    <td colspan="6" class="py-16 text-center text-gray-500">
+                        No movies yet. <a href="/movies/add" class="text-brand hover:underline">Add one</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script src="/js/auth.js"></script>
+<script>
+    async function requireAdminAccess() {
+        if (!AuthService.isAuthenticated() || !AuthService.isAdmin()) {
+            window.location.href = '/movies/list';
+            return;
+        }
+        const user = AuthService.getCurrentUser();
+        document.getElementById('admin-user-label').textContent = 'Admin: ' + user.username;
+        document.getElementById('admin-user-label').classList.remove('hidden');
+        await fetch('/movies/session/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userType: user.type })
+        });
+    }
+    requireAdminAccess();
+</script>
 </body>
 </html>

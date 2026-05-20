@@ -1,5 +1,14 @@
 <!DOCTYPE html>
+<!--
+  HOME PAGE (Thymeleaf) — templates/index.html
+  Served at: GET /  via PageController.showHomePage()
 
+  MOVIE ROUTING (Movie module):
+  - "Movies" nav  → GET /movies/list  → movie-list.html (all users)
+  - "Explore Movies" hero CTA → same URL
+  - Admin dropdown "Manage Movies" → GET /movies/dashboard → admin-dashboard.html
+  - Featured grid below uses ${movies} from the database (first 4 titles)
+-->
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -11,9 +20,10 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: '#ff4d6d', // Accent pink/red
-                        darkbg: '#0a0a0f', // Main background
-                        cardbg: '#161b28', // Movie card background
+                        brand: '#ff4d6d',
+                        brandLight: '#A4133c',
+                        darkbg: '#000000',
+                        cardbg: '#141414',
                     }
                 }
             }
@@ -21,7 +31,7 @@
     </script>
     <style>
         .hero-section {
-            background-image: linear-gradient(to right, rgba(0, 0, 0, 0.95) 10%, rgba(0, 0, 0, 0.5) 60%, rgba(0, 0, 0, 0) 100%),
+            background-image: linear-gradient(to right, rgba(0,0,0,0.95) 10%, rgba(0,0,0,0.5) 60%, transparent),
             url('https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2070&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
@@ -30,72 +40,188 @@
 </head>
 <body class="bg-darkbg text-white font-sans">
 
-<nav class="flex items-center justify-between px-10 py-6 border-b border-brand/20">
-    <div class="flex items-center space-x-2">
-        <span class="text-2xl font-bold tracking-wider"><span class="text-brand">Q</span>uickShow</span>
-    </div>
+<nav class="flex items-center justify-between px-10 py-6 border-b border-brand/30">
+    <span class="text-2xl font-bold tracking-wider"><span class="text-brand">Q</span>uickShow</span>
     <div class="hidden md:flex space-x-8 bg-white/5 px-6 py-2 rounded-full backdrop-blur-md border border-brand/20">
         <a href="/" class="hover:text-brand transition">Home</a>
-        <!-- Routes regular users to the public movie catalog (movie-list.html) -->
         <a href="/movies/list" class="hover:text-brand transition">Movies</a>
         <a href="#" class="hover:text-brand transition text-gray-500">Theaters</a>
         <a href="#" class="hover:text-brand transition text-gray-500">Releases</a>
+        <a href="#" onclick="goToSnacksPage(event)" class="hover:text-brand transition">Snacks</a>
     </div>
     <div class="flex items-center space-x-6">
-        <a id="admin-movies-nav" href="/movies/dashboard" class="hidden text-sm text-brand hover:underline">Manage Movies</a>
-        <button class="bg-brand hover:bg-brandLight px-6 py-2 rounded-full font-semibold transition" onclick="login()">Login</button>
+        <button onclick="toggleSearch()" class="hover:text-brand transition" aria-label="Search">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </button>
+        <div class="relative">
+            <button id="login-button" class="bg-brand hover:bg-brandLight px-6 py-2 rounded-full font-semibold transition" onclick="login()">Login</button>
+            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-44 bg-cardbg rounded-xl shadow-lg z-50 border border-brand/20">
+                <a href="/movies/list" class="block px-4 py-2 text-sm hover:bg-white/10">Browse Movies</a>
+                <a href="/snacks-user.html" class="block px-4 py-2 text-sm hover:bg-white/10">Snacks</a>
+                <button onclick="signOut()" class="w-full text-left px-4 py-2 text-sm text-brand hover:bg-white/10">Sign out</button>
+            </div>
+            <div id="admin-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-cardbg rounded-xl shadow-lg z-50 border border-brand/20">
+                <a href="/movies/list" class="block px-4 py-2 text-sm hover:bg-white/10">Movie List (Public)</a>
+                <a href="/movies/dashboard" class="block px-4 py-2 text-sm hover:bg-white/10 text-brand font-medium">Manage Movies (Admin)</a>
+                <a href="/snacks-admin.html" class="block px-4 py-2 text-sm hover:bg-white/10">Manage Snacks</a>
+                <button onclick="signOut()" class="w-full text-left px-4 py-2 text-sm text-brand hover:bg-white/10">Sign out</button>
+            </div>
+        </div>
     </div>
 </nav>
 
-<!-- Hero Section -->
-<header class="hero-section h-[600px] flex items-center px-10">
+<div id="search-bar" class="hidden bg-cardbg border-b border-brand/20 px-10 py-4">
+    <div class="max-w-2xl mx-auto flex gap-3">
+        <input type="text" id="search-input" placeholder="Search movies..." class="flex-1 bg-black border border-brand/30 rounded-full px-6 py-2 text-sm focus:outline-none focus:border-brand" oninput="searchMovies()" />
+        <button onclick="toggleSearch()" class="text-sm text-gray-400 hover:text-white">Close</button>
+    </div>
+    <div id="search-results" class="max-w-2xl mx-auto mt-3 space-y-2"></div>
+</div>
+
+<header class="hero-section h-[560px] flex items-center px-10">
     <div class="max-w-2xl">
-        <p class="text-sm font-bold tracking-widest bg-white text-black inline-block px-2 py-1 mb-4 rounded-sm">MARVEL STUDIOS</p>
-        <h1 class="text-6xl font-bold leading-tight mb-4">Guardians<br>of the Galaxy</h1>
-        <div class="flex items-center space-x-4 text-sm text-gray-300 mb-6">
-            <span>Action | Adventure | Sci-Fi</span>
-            <span>📅 2018</span>
-            <span>⏱ 2h 8m</span>
-        </div>
-        <p class="text-gray-400 mb-8 leading-relaxed">
-            In a post-apocalyptic world where cities ride on wheels and consume each other to survive, two people meet in London and try to stop a conspiracy.
-        </p>
-        <button class="bg-brand hover:bg-pink-600 px-8 py-3 rounded-full font-semibold flex items-center space-x-2 transition">
-            <span>Explore Movies</span>
-            <span>→</span>
-        </button>
+        <p class="text-sm font-bold tracking-widest bg-brand text-white inline-block px-2 py-1 mb-4 rounded-sm">NOW SHOWING</p>
+        <h1 class="text-5xl md:text-6xl font-bold leading-tight mb-4">Your Next<br>Cinema Night</h1>
+        <p class="text-gray-400 mb-8 leading-relaxed">Browse titles, genres, and showtimes — then book your seats.</p>
+        <a href="/movies/list" class="inline-flex items-center gap-2 bg-brand hover:bg-brandLight px-8 py-3 rounded-full font-semibold transition shadow-lg shadow-brand/30">
+            Explore Movies <span>→</span>
+        </a>
     </div>
 </header>
 
-<!-- Preview: first few movies from home page model; full catalog at /movies/list -->
-<section class="px-10 py-16" th:if="${movies != null and !movies.isEmpty()}">
+<section class="px-10 py-16">
     <div class="flex justify-between items-end mb-8">
         <h2 class="text-2xl font-bold">Featured Now Showing</h2>
         <a href="/movies/list" class="text-brand hover:underline text-sm font-medium">View all movies →</a>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div th:if="${movies == null or movies.isEmpty()}" class="text-gray-500 text-center py-12 border border-brand/20 rounded-2xl">
+        No movies in the catalog yet. <a href="/movies/list" class="text-brand underline">Open movie list</a>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" th:if="${movies != null and !movies.isEmpty()}">
         <div th:each="movie, stat : ${movies}" th:if="${stat.index < 4}"
-             class="bg-cardbg border border-brand/20 rounded-2xl p-4 flex flex-col transition hover:-translate-y-1 hover:shadow-lg hover:shadow-brand/20">
+             class="bg-cardbg border border-brand/20 rounded-2xl p-4 flex flex-col hover:-translate-y-1 hover:shadow-lg hover:shadow-brand/20 transition">
             <img th:src="${movie.poster}" alt="Poster" class="rounded-xl h-56 object-cover w-full mb-4">
-            <span class="text-xs text-brand uppercase tracking-wider mb-1" th:text="${movie.genre}">Genre</span>
-            <h3 class="text-lg font-bold mb-1" th:text="${movie.title}">Movie Title</h3>
-            <p class="text-xs text-gray-400 mb-4">Showtime: <span th:text="${movie.showtime}">10:00 AM</span></p>
-            <a th:href="@{/movies/view/{id}(id=${movie.movieId})}"
-               class="mt-auto bg-brand hover:bg-brandLight px-4 py-1.5 rounded-full text-sm font-semibold transition text-center text-white">
-                Buy Tickets
-            </a>
+            <span class="text-xs text-brand uppercase tracking-wider mb-1" th:text="${movie.genre} ?: 'General'">Genre</span>
+            <h3 class="text-lg font-bold mb-1" th:text="${movie.title}">Title</h3>
+            <p class="text-xs text-gray-400 mb-4">Showtime: <span th:text="${movie.showtime}">—</span></p>
+            <a th:href="@{/movies/view/{id}(id=${movie.movieId})}" class="mt-auto bg-brand hover:bg-brandLight px-4 py-1.5 rounded-full text-sm font-semibold text-center">Buy Tickets</a>
         </div>
     </div>
 </section>
 
+<div id="login-popup" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+    <div class="bg-cardbg border border-brand/30 rounded-2xl shadow-xl p-8 w-full max-w-sm mx-4">
+        <h2 class="text-xl font-semibold mb-6">Sign in</h2>
+        <div class="space-y-4">
+            <input type="text" id="login-username" placeholder="Username" class="w-full border border-gray-600 rounded-lg px-4 py-2 text-black" />
+            <input type="password" id="login-password" placeholder="Password" class="w-full border border-gray-600 rounded-lg px-4 py-2 text-black" />
+        </div>
+        <div class="mt-6 flex gap-3">
+            <button onclick="submitLogin()" class="flex-1 bg-brand hover:bg-brandLight rounded-lg px-4 py-2 text-sm font-medium">Sign in</button>
+            <button onclick="closeLogin()" class="flex-1 rounded-lg px-4 py-2 text-sm border border-gray-600 hover:bg-white/5">Cancel</button>
+        </div>
+        <p class="mt-3 text-center text-sm text-gray-400">No account? <a href="/register.html" class="text-brand font-semibold">Register</a></p>
+    </div>
+</div>
+
 <script src="/js/auth.js"></script>
 <script>
-    function login() {
-        alert("Use the main site login — then visit Movies to browse the catalog.");
+    let catalogMovies = [];
+
+    async function loadCatalogForSearch() {
+        try {
+            const res = await fetch('/movies/api/available');
+            catalogMovies = await res.json();
+        } catch (e) {
+            catalogMovies = [];
+        }
     }
-    if (typeof AuthService !== 'undefined' && AuthService.isAdmin()) {
-        document.getElementById('admin-movies-nav').classList.remove('hidden');
+
+    function login() { document.getElementById('login-popup').classList.remove('hidden'); }
+    function closeLogin() {
+        document.getElementById('login-popup').classList.add('hidden');
+        document.getElementById('login-username').value = '';
+        document.getElementById('login-password').value = '';
     }
+
+    async function submitLogin() {
+        const result = await AuthService.login(
+            document.getElementById('login-username').value,
+            document.getElementById('login-password').value
+        );
+        if (result.ok) {
+            closeLogin();
+            await applyLoggedInUI(result.user);
+        } else {
+            alert(result.error);
+        }
+    }
+
+    async function applyLoggedInUI(user) {
+        const btn = document.getElementById('login-button');
+        btn.textContent = user.username;
+        btn.onclick = user.type === 'Admin' ? toggleAdminDropdown : toggleDropdown;
+        if (user.type === 'Admin') {
+            await fetch('/movies/session/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userType: user.type })
+            });
+        }
+    }
+
+    function restoreSessionUI() {
+        const user = AuthService.getCurrentUser();
+        if (user) applyLoggedInUI(user);
+    }
+
+    function toggleDropdown() { document.getElementById('user-dropdown').classList.toggle('hidden'); }
+    function toggleAdminDropdown() { document.getElementById('admin-dropdown').classList.toggle('hidden'); }
+
+    function signOut() {
+        AuthService.clearSession();
+        const btn = document.getElementById('login-button');
+        btn.textContent = 'Login';
+        btn.onclick = login;
+        document.getElementById('user-dropdown').classList.add('hidden');
+        document.getElementById('admin-dropdown').classList.add('hidden');
+        closeLogin();
+    }
+
+    function toggleSearch() {
+        const bar = document.getElementById('search-bar');
+        bar.classList.toggle('hidden');
+        if (!bar.classList.contains('hidden')) document.getElementById('search-input').focus();
+    }
+
+    function searchMovies() {
+        const q = document.getElementById('search-input').value.toLowerCase().trim();
+        const results = document.getElementById('search-results');
+        if (!q) { results.innerHTML = ''; return; }
+        const filtered = catalogMovies.filter(m =>
+            (m.title && m.title.toLowerCase().includes(q)) ||
+            (m.genre && m.genre.toLowerCase().includes(q))
+        );
+        if (!filtered.length) {
+            results.innerHTML = '<p class="text-gray-500 text-sm">No movies found.</p>';
+            return;
+        }
+        results.innerHTML = filtered.map(m => `
+            <a href="/movies/view/${m.movieId}" class="flex items-center gap-3 bg-black rounded-xl px-4 py-3 hover:bg-brand/10 transition">
+                <img src="${m.poster}" class="w-12 h-12 rounded-lg object-cover" alt="">
+                <div><p class="font-semibold text-sm">${m.title}</p><p class="text-xs text-gray-400">${m.genre || ''}</p></div>
+            </a>`).join('');
+    }
+
+    function goToSnacksPage(e) {
+        if (e) e.preventDefault();
+        window.location.href = AuthService.getSnacksPageUrl();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCatalogForSearch();
+        restoreSessionUI();
+    });
 </script>
 </body>
 </html>

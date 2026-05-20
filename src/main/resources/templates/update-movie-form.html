@@ -1,45 +1,76 @@
 <!DOCTYPE html>
+<!-- ADMIN — Update Movie. POST /movies/update/{id} → MovieManager.updateMovie (Admin only). -->
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Movie</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { theme: { extend: { colors: { brand: '#3F000F', darkbg: '#0a0a0f', cardbg: '#161b28' } } } }
+        tailwind.config = { theme: { extend: { colors: { brand: '#ff4d6d', brandLight: '#A4133c', darkbg: '#000000', cardbg: '#141414' } } } }
     </script>
 </head>
 <body class="bg-darkbg text-white font-sans min-h-screen flex items-center justify-center p-6">
 
-<div class="bg-cardbg p-8 rounded-2xl w-full max-w-md shadow-2xl border border-gray-800">
+<div class="bg-cardbg p-8 rounded-2xl w-full max-w-md shadow-2xl border border-brand/30">
     <h2 class="text-2xl font-bold mb-6 text-center text-brand">Update Movie</h2>
+
+    <div th:if="${error}" class="mb-4 text-red-400 text-sm text-center" th:text="${error}"></div>
 
     <form th:action="@{/movies/update/{id}(id=${movie.movieId})}" th:object="${movie}" method="post" class="space-y-4">
 
         <div>
-            <label class="block text-sm text-gray-400 mb-1">Poster Image URL</label>
-            <input type="text" th:field="*{poster}" class="w-full bg-darkbg border border-gray-700 rounded-lg px-4 py-2 focus:border-brand outline-none" required>
+            <label class="block text-sm text-gray-400 mb-1">Movie Title</label>
+            <input type="text" th:field="*{title}" class="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 focus:border-brand outline-none" required>
         </div>
 
         <div>
-            <label class="block text-sm text-gray-400 mb-1">Summary / Title</label>
-            <textarea th:field="*{summary}" class="w-full bg-darkbg border border-gray-700 rounded-lg px-4 py-2 focus:border-brand outline-none h-24" required></textarea>
+            <label class="block text-sm text-gray-400 mb-1">Genre</label>
+            <input type="text" th:field="*{genre}" class="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 focus:border-brand outline-none" required>
         </div>
 
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Poster Image URL</label>
+            <input type="text" th:field="*{poster}" class="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 focus:border-brand outline-none" required>
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Summary</label>
+            <textarea th:field="*{summary}" class="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 focus:border-brand outline-none h-24" required></textarea>
+        </div>
+
+        <!-- BUG FIX: was *{showtimes} only; *{showtime} matches the entity field name directly -->
         <div>
             <label class="block text-sm text-gray-400 mb-1">Showtimes</label>
-            <input type="text" th:field="*{showtimes}" class="w-full bg-darkbg border border-gray-700 rounded-lg px-4 py-2 focus:border-brand outline-none" required>
+            <input type="text" th:field="*{showtime}" class="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 focus:border-brand outline-none" required>
         </div>
 
         <div>
             <label class="block text-sm text-gray-400 mb-1">Theater ID</label>
-            <input type="text" th:field="*{theaterId}" class="w-full bg-darkbg border border-gray-700 rounded-lg px-4 py-2 focus:border-brand outline-none" required>
+            <input type="text" th:field="*{theaterId}" class="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 focus:border-brand outline-none" required>
         </div>
 
         <div class="flex gap-4 pt-4">
-            <button type="submit" class="flex-1 bg-brand hover:opacity-80 py-2 rounded-lg font-semibold transition">Save Changes</button>
-            <a href="/movies/dashboard" class="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded-lg font-semibold transition text-center">Cancel</a>
+            <button type="submit" class="flex-1 bg-brand hover:bg-brandLight py-2 rounded-lg font-semibold transition">Save Changes</button>
+            <a href="/movies/dashboard" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2 rounded-lg font-semibold transition text-center">Cancel</a>
         </div>
     </form>
 </div>
+
+<script src="/js/auth.js"></script>
+<script>
+    async function requireAdminAccess() {
+        if (!AuthService.isAuthenticated() || !AuthService.isAdmin()) {
+            window.location.href = '/movies/list';
+            return;
+        }
+        await fetch('/movies/session/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userType: AuthService.getCurrentUser().type })
+        });
+    }
+    requireAdminAccess();
+</script>
 </body>
 </html>
