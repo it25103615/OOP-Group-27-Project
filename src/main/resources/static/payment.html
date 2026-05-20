@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment — QuickShow</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+    <a href="/index.html" class="logo"><span>Q</span>uickShow</a>
+    <nav class="nav-main" aria-label="Primary">
+        <a href="/index.html">Home</a>
+        <a href="/index.html#now-showing">Movies</a>
+        <a href="/theaters.html">Theaters</a>
+        <a href="/index.html#releases">Releases</a>
+        <a href="#" onclick="goSnacksNav(event)">Snacks</a>
+    </nav>
+</header>
+
+<main class="container">
+    <h1 class="page-title">Payment</h1>
+    <p class="page-subtitle">Booking is confirmed only after successful payment.</p>
+
+    <section class="booking-card" id="order-summary">
+        <p class="loading">Loading order…</p>
+    </section>
+
+    <section class="booking-card">
+        <h2>Payment method (placeholder)</h2>
+        <p style="color:var(--muted);font-size:0.9rem;">Card / wallet integration coming soon. Click Pay Now to simulate a successful payment.</p>
+        <div class="form-field" style="margin-top:1rem">
+            <label>Card number</label>
+            <input type="text" placeholder="4111 1111 1111 1111" disabled value="•••• •••• •••• ••••">
+        </div>
+        <button type="button" class="btn btn-brand" style="margin-top:1.25rem" id="pay-btn">Pay Now</button>
+        <a href="/seats.html" id="back-seats" class="btn btn-ghost" style="margin-left:0.5rem">← Back to seats</a>
+    </section>
+</main>
+
+<div id="auth-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+        <h2>Sign in to pay</h2>
+        <p class="hint">New user? <a href="/register.html" id="register-link">Register</a> first, then sign in here.</p>
+        <input type="text" id="modal-username" placeholder="Username" autocomplete="username">
+        <input type="password" id="modal-password" placeholder="Password" autocomplete="current-password">
+        <div class="modal-actions">
+            <button type="button" class="btn btn-brand" id="modal-login-btn">Sign in</button>
+            <button type="button" class="btn btn-ghost" id="modal-cancel-btn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script src="/js/cinema-booking.js"></script>
+<script>
+(function () {
+    const pending = CinemaBooking.getPendingBooking();
+    const summaryEl = document.getElementById('order-summary');
+    const payBtn = document.getElementById('pay-btn');
+    const authModal = document.getElementById('auth-modal');
+
+    if (!pending) {
+        summaryEl.innerHTML = '<p class="message error">No pending booking. <a href="/theaters.html">Choose a theater</a>.</p>';
+        payBtn.disabled = true;
+        return;
+    }
+
+    document.getElementById('back-seats').href =
+        '/seats.html?theaterId=' + encodeURIComponent(pending.theaterId);
+
+    document.getElementById('register-link').href =
+        '/register.html?next=' + encodeURIComponent('/payment.html');
+
+    summaryEl.innerHTML =
+        '<h2>Order summary</h2>' +
+        '<p><strong>Movie:</strong> ' + esc(pending.movieTitle) + '</p>' +
+        '<p><strong>Theater:</strong> ' + esc(pending.theaterName) + '</p>' +
+        '<p><strong>Date:</strong> ' + esc(pending.showDateDisplay || pending.showDate) + '</p>' +
+        '<p><strong>Time:</strong> ' + esc(pending.showTime) + '</p>' +
+        '<p><strong>Seats:</strong> ' + esc(pending.seatLabels) + '</p>' +
+        '<p><strong>Total:</strong> LKR ' + Number(pending.totalAmount).toLocaleString() + '</p>';
+
+    payBtn.addEventListener('click', function () {
+        if (!AuthService.isAuthenticated()) {
+            authModal.classList.remove('hidden');
+            return;
+        }
+        processPayment();
+    });
+
+    document.getElementById('modal-login-btn').addEventListener('click', async function () {
+        const result = await AuthService.login(
+            document.getElementById('modal-username').value.trim(),
+            document.getElementById('modal-password').value
+        );
+        if (!result.ok) {
+            alert(result.error);
+            return;
+        }
+        authModal.classList.add('hidden');
+        processPayment();
+    });
+
+    document.getElementById('modal-cancel-btn').addEventListener('click', function () {
+        authModal.classList.add('hidden');
+    });
+
+    async function processPayment() {
+        payBtn.disabled = true;
+        payBtn.textContent = 'Processing…';
+        const user = AuthService.getCurrentUser();
+        const body = {
+            movieTitle: pending.movieTitle,
+            theaterId: pending.theaterId,
+            theaterName: pending.theaterName,
+            showDate: pending.showDateDisplay || pending.showDate,
+            showTime: pending.showTime,
+            seatIds: pending.seatIds,
+            seatLabels: pending.seatLabels,
+            totalAmount: pending.totalAmount,
+            username: user ? user.username : 'guest'
+        };
+
+        try {
+            await new Promise(function (r) { setTimeout(r, 800); });
+            const res = await fetch('/api/bookings/confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || 'Payment failed');
+            }
+            CinemaBooking.clearPendingBooking();
+            CinemaBooking.saveLastBooking({
+                bookingId: data.bookingId,
+                movieTitle: pending.movieTitle,
+                theaterName: pending.theaterName,
+                showDate: pending.showDateDisplay || pending.showDate,
+                showTime: pending.showTime,
+                seatLabels: pending.seatLabels,
+                totalAmount: pending.totalAmount
+            });
+            const q = new URLSearchParams({
+                movie: pending.movieTitle,
+                theater: pending.theaterName,
+                date: pending.showDateDisplay || pending.showDate,
+                time: pending.showTime,
+                seats: pending.seatLabels,
+                id: data.bookingId || ''
+            });
+            window.location.href = '/booking-success.html?' + q.toString();
+        } catch (err) {
+            alert(err.message || 'Payment could not be completed.');
+            payBtn.disabled = false;
+            payBtn.textContent = 'Pay Now';
+        }
+    }
+
+    function esc(t) {
+        const d = document.createElement('span');
+        d.textContent = t || '';
+        return d.innerHTML;
+    }
+})();
+</script>
+</body>
+</html>

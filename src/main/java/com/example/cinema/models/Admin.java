@@ -5,8 +5,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "admins")
 @DiscriminatorValue("ADMIN")
-public class Admin extends User{
-    public Admin(String userName, String password) {
+public class Admin extends User{ public Admin(String userName, String password) {
         super(userName, password);
     }
 
