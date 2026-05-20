@@ -28,9 +28,9 @@
   </div>
   <div class="hidden md:flex space-x-8 bg-white/10 px-6 py-2 rounded-full backdrop-blur-md">
     <a href="/index.html" class="hover:text-brand transition">Home</a>
-    <a href="#" class="hover:text-brand transition">Movies</a>
-    <a href="#" class="hover:text-brand transition">Theaters</a>
-    <a href="#" class="hover:text-brand transition">Releases</a>
+    <a href="/index.html#now-showing" class="hover:text-brand transition">Movies</a>
+    <a href="/theaters.html" class="hover:text-brand transition">Theaters</a>
+    <a href="/index.html#releases" class="hover:text-brand transition">Releases</a>
     <a href="/snacks-admin.html" class="text-brand transition font-semibold">Snacks</a>
   </div>
   <div class="flex items-center space-x-4">
@@ -56,8 +56,21 @@
   </button>
 </div>
 
+<!-- Search -->
+<div class="px-10 mb-6">
+  <div class="max-w-xl flex gap-3">
+    <input type="text" id="snack-search" placeholder="Search for Snacks"
+           oninput="searchSnacks()"
+           class="flex-1 bg-cardbg border border-white/20 rounded-full px-6 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-brand transition" />
+    <button type="button" onclick="clearSnackSearch()"
+            class="bg-white/10 hover:bg-white/20 px-5 py-2 rounded-full text-sm font-semibold transition shrink-0">
+      Clear
+    </button>
+  </div>
+</div>
+
 <!-- Category Filter Tabs -->
-<div class="px-10 mb-8 flex space-x-4">
+<div class="px-10 mb-8 flex flex-wrap gap-4">
   <button onclick="filterCategory('All')" id="tab-All"
           class="tab-btn bg-brand px-5 py-2 rounded-full text-sm font-semibold transition">All</button>
   <button onclick="filterCategory('Food')" id="tab-Food"
@@ -73,7 +86,7 @@
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="snack-grid"></div>
   <div id="empty-state" class="hidden text-center py-20 text-gray-500">
     <p class="text-2xl mb-2">No snacks found</p>
-    <p class="text-sm">Try a different category or add a new snack</p>
+    <p class="text-sm">Try a different category, search term, or add a new snack</p>
   </div>
 </section>
 
@@ -195,13 +208,14 @@
 
   let allSnacks = [];
   let currentCategory = 'All';
+  let searchQuery = '';
 
   // ── Snack image map — matches snack name to a real food image ──
   const snackImages = {
     // Food
     'popcorn':        'https://images.unsplash.com/photo-1585647347483-22b66260dfff?w=500&q=80',
     'large popcorn':  'https://images.unsplash.com/photo-1585647347483-22b66260dfff?w=500&q=80',
-    'nachos':         'https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?w=500&q=80',
+    'nachos':         'https://plus.unsplash.com/premium_photo-1679816176733-e9b260edc969?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fG5hY2hvc3xlbnwwfHwwfHx8MA%3D%3D',
     'hot dog':        'https://images.unsplash.com/photo-1612392166886-ee8475b03af2?w=500&q=80',
     'french fries':   'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=500&q=80',
     'burger':         'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&q=80',
@@ -255,10 +269,39 @@
       allSnacks = await res.json();
       // Management view: stable order by snack ID (not shuffled)
       allSnacks.sort((a, b) => a.snackId.localeCompare(b.snackId));
-      renderSnacks(allSnacks);
+      renderSnacks(getFilteredSnacks());
     } catch (err) {
       console.error('Failed to load snacks:', err);
     }
+  }
+
+  function getFilteredSnacks() {
+    const q = searchQuery.trim().toLowerCase();
+    return allSnacks.filter(s => {
+      const matchCategory = currentCategory === 'All' || s.category === currentCategory;
+      if (!matchCategory) {
+        return false;
+      }
+      if (!q) {
+        return true;
+      }
+      return (
+        s.name.toLowerCase().includes(q) ||
+        s.category.toLowerCase().includes(q) ||
+        String(s.snackId).toLowerCase().includes(q)
+      );
+    });
+  }
+
+  function searchSnacks() {
+    searchQuery = document.getElementById('snack-search').value;
+    renderSnacks(getFilteredSnacks());
+  }
+
+  function clearSnackSearch() {
+    searchQuery = '';
+    document.getElementById('snack-search').value = '';
+    renderSnacks(getFilteredSnacks());
   }
 
   // ── Render snack cards ─────────────────────────────────────────
@@ -310,11 +353,7 @@
     });
     document.getElementById('tab-' + category).classList.add('bg-brand');
     document.getElementById('tab-' + category).classList.remove('bg-white/10');
-    if (category === 'All') {
-      renderSnacks(allSnacks);
-    } else {
-      renderSnacks(allSnacks.filter(s => s.category === category));
-    }
+    renderSnacks(getFilteredSnacks());
   }
 
   // ── ADD MODAL ──────────────────────────────────────────────────
