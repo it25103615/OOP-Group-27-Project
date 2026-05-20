@@ -84,7 +84,8 @@ public class SnackOrderService {
 
         SnackOrder order = new SnackOrder();
         order.setUserId(user.getId());
-        order.setUsername(user.getUsername());
+        String displayName = user.getUsername();
+        order.setUsername(displayName != null && !displayName.isBlank() ? displayName : "Customer");
         order.setTotalAmount(total);
         order.setPlacedAt(Instant.now());
         order.setItems(orderLines);

@@ -115,8 +115,35 @@ class UserController {
 
         customer.setBillingAddresses(body.getOrDefault("billingAddress", ""));
 
+        String billingAddress = body.getOrDefault("billingAddress", "");
+
+        Customer customer = new Customer(username, password, phoneNumber, billingAddress);
         Customer saved = customerRepository.save(customer);
-        return ResponseEntity.ok(Map.of("message", "Registered successfully", "userID", saved.getId()));
+        return ResponseEntity.ok(Map.of(
+                "message", "Registered successfully",
+                "userId", saved.getId(),
+                "username", saved.getUserName(),
+                "type", "Customer"
+        ));
+    }
+
+    private static int parsePhoneNumber(String raw) {
+        if (raw == null || raw.isBlank() || "0".equals(raw.trim())) {
+            return 0;
+        }
+        String digits = raw.replaceAll("\\D", "");
+        if (digits.isEmpty()) {
+            return 0;
+        }
+        try {
+            long value = Long.parseLong(digits);
+            if (value > Integer.MAX_VALUE) {
+                return -1;
+            }
+            return (int) value;
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
     //Create a new Admin User
