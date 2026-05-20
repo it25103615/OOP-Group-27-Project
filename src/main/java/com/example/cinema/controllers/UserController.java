@@ -71,19 +71,53 @@ class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> body){
+    public ResponseEntity<?> register(@RequestBody Map<String, String> body) {
         String username = body.get("username");
         String password = body.get("password");
 
-        if(userRepository.findByUserName(username).isPresent()){
+        if (username == null || username.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Username is required"));
+        }
+        if (password == null || password.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Password is required"));
+        }
+        if (userRepository.findByUserName(username).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username already exists"));
         }
 
-        Customer customer = new Customer(username, password);
-        customer.setPhoneNumber(Integer.parseInt(body.getOrDefault("phoneNumber", "")));
-        customer.setBillingAddresses(body.getOrDefault("billingAddress", ""));
+        int phoneNumber = parsePhoneNumber(body.get("phoneNumber"));
+        if (phoneNumber < 0) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid phone number"));
+        }
 
+        String billingAddress = body.getOrDefault("billingAddress", "");
+
+        Customer customer = new Customer(username, password, phoneNumber, billingAddress);
         Customer saved = customerRepository.save(customer);
-        return ResponseEntity.ok(Map.of("message", "Registered successfully", "userID", saved.getId()));
+        return ResponseEntity.ok(Map.of(
+                "message", "Registered successfully",
+                "userId", saved.getId(),
+                "username", saved.getUserName(),
+                "type", "Customer"
+        ));
+    }
+
+    private static int parsePhoneNumber(String raw) {
+        if (raw == null || raw.isBlank() || "0".equals(raw.trim())) {
+            return 0;
+        }
+        String digits = raw.replaceAll("\\D", "");
+        if (digits.isEmpty()) {
+            return 0;
+        }
+        try {
+            long value = Long.parseLong(digits);
+            if (value > Integer.MAX_VALUE) {
+                return -1;
+            }
+            return (int) value;
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 }
