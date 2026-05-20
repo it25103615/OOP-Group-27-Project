@@ -65,12 +65,13 @@ public class Movie {
         this.summary = summary;
     }
 
-    public String getShowtimes() {
+    /** Primary accessor used by forms and public movie pages. */
+    public String getShowtime() {
         return showtime;
     }
 
-    public void setShowtimes(String showtimes) {
-        this.showtime = showtimes;
+    public void setShowtime(String showtime) {
+        this.showtime = showtime;
     }
 
     public String getTheaterId() {
