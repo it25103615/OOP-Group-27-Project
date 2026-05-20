@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View booking — QuickShow</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+    <a href="/index.html" class="logo"><span>Q</span>uickShow</a>
+    <nav class="nav-main" aria-label="Primary">
+        <a href="/index.html">Home</a>
+        <a href="/theaters.html">Theaters</a>
+    </nav>
+</header>
+
+<main class="container">
+    <h1 class="page-title">Your booking</h1>
+    <section class="booking-card" id="booking-detail">
+        <p class="loading">Loading…</p>
+    </section>
+    <div class="success-actions" style="margin-top:1.5rem">
+        <a href="/theaters.html" class="btn btn-brand">Book again</a>
+        <a href="/index.html" class="btn btn-ghost">Back to Home</a>
+    </div>
+</main>
+
+<script src="/js/cinema-booking.js"></script>
+<script>
+(function () {
+    const el = document.getElementById('booking-detail');
+    const b = CinemaBooking.getLastBooking();
+    const p = new URLSearchParams(window.location.search);
+    const id = p.get('id') || (b && b.bookingId);
+
+    if (id) {
+        fetch('/api/bookings/' + encodeURIComponent(id))
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (data) render(data);
+                else if (b) renderLocal(b);
+                else el.innerHTML = '<p class="message">No booking found.</p>';
+            })
+            .catch(function () {
+                if (b) renderLocal(b);
+            });
+    } else if (b) {
+        renderLocal(b);
+    } else {
+        el.innerHTML = '<p class="message">No booking found. Complete a payment first.</p>';
+    }
+
+    function renderLocal(b) {
+        render({
+            bookingId: b.bookingId,
+            movieTitle: b.movieTitle,
+            theaterName: b.theaterName,
+            showDate: b.showDate,
+            showTime: b.showTime,
+            seatLabels: b.seatLabels,
+            totalAmount: b.totalAmount,
+            status: 'CONFIRMED'
+        });
+    }
+
+    function render(data) {
+        el.innerHTML =
+            '<p><strong>Booking ID:</strong> ' + esc(data.bookingId || '—') + '</p>' +
+            '<p><strong>Movie:</strong> ' + esc(data.movieTitle) + '</p>' +
+            '<p><strong>Theater:</strong> ' + esc(data.theaterName) + '</p>' +
+            '<p><strong>Date:</strong> ' + esc(data.showDate) + '</p>' +
+            '<p><strong>Time:</strong> ' + esc(data.showTime) + '</p>' +
+            '<p><strong>Seats:</strong> ' + esc(data.seatLabels) + '</p>' +
+            '<p><strong>Total:</strong> LKR ' + Number(data.totalAmount || 0).toLocaleString() + '</p>' +
+            '<p><strong>Status:</strong> ' + esc(data.status) + '</p>';
+    }
+
+    function esc(t) {
+        const d = document.createElement('span');
+        d.textContent = t || '';
+        return d.innerHTML;
+    }
+})();
+</script>
+</body>
+</html>
