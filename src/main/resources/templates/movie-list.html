@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<!--
+  USER MOVIE LIST — movie-list.html
+  Served at: GET /movies/list (MovieController.showMovieList)
+  Data: MovieManager.getAvailableMovies() — public, no admin check.
+  Any regular user or guest can browse Title, Genre, Showtimes, Theater, and buy tickets.
+-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Now Showing — QuickShow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#3F000F',
+                        brandLight: '#5c0016',
+                        panel: '#141414',
+                        border: '#2a0a10'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: radial-gradient(ellipse 70% 45% at 50% -10%, rgba(63, 0, 15, 0.5), transparent), #000000;
+        }
+    </style>
+</head>
+<body class="text-white font-sans min-h-screen antialiased">
+
+<nav class="border-b border-brand/40 bg-black/90 backdrop-blur sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+        <a href="/" class="text-xl font-bold tracking-wide">
+            <span class="text-brand">Q</span>uickShow
+        </a>
+        <div class="flex items-center gap-6 text-sm">
+            <a href="/" class="text-gray-400 hover:text-white transition">Home</a>
+            <a href="/movies/list" class="text-brand font-semibold">Movies</a>
+            <a id="admin-movies-link" href="/movies/dashboard"
+               class="hidden text-gray-400 hover:text-brand transition">Manage Movies</a>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-12">
+    <header class="mb-10">
+        <p class="text-xs uppercase tracking-[0.25em] text-brand mb-2">Now Showing</p>
+        <h1 class="text-4xl font-bold">Available Movies</h1>
+        <p class="text-gray-500 mt-2 max-w-xl">Browse our current lineup — pick a showtime and reserve your seats.</p>
+    </header>
+
+    <div th:if="${#lists.isEmpty(movies)}" class="text-center py-20 text-gray-500 border border-border rounded-2xl bg-panel">
+        <p class="text-lg">No movies are showing right now. Check back soon.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <article th:each="movie : ${movies}"
+                 class="bg-panel border border-border rounded-2xl overflow-hidden flex flex-col hover:border-brand/50 hover:shadow-lg hover:shadow-brand/20 transition-all duration-300 group">
+            <div class="relative overflow-hidden">
+                <img th:src="${movie.poster}" th:alt="${movie.title}"
+                     class="h-72 w-full object-cover group-hover:scale-105 transition-transform duration-500">
+                <span class="absolute top-3 left-3 text-xs font-semibold uppercase tracking-wider bg-brand/90 text-white px-2 py-1 rounded"
+                      th:text="${movie.genre}">Genre</span>
+            </div>
+            <div class="p-5 flex flex-col flex-1">
+                <h2 class="text-lg font-bold mb-1" th:text="${movie.title}">Movie Title</h2>
+                <p class="text-sm text-gray-500 line-clamp-2 mb-4" th:text="${movie.summary}">Summary</p>
+                <dl class="space-y-2 text-sm mb-5">
+                    <div class="flex justify-between gap-2 border-b border-white/5 pb-2">
+                        <dt class="text-gray-500">Showtimes</dt>
+                        <dd class="text-right text-gray-200 font-medium" th:text="${movie.showtime}">10:00 AM</dd>
+                    </div>
+                    <div class="flex justify-between gap-2">
+                        <dt class="text-gray-500">Theater</dt>
+                        <dd class="font-mono text-brand" th:text="${movie.theaterId}">TH-01</dd>
+                    </div>
+                </dl>
+                <a th:href="@{/movies/view/{id}(id=${movie.movieId})}"
+                   class="mt-auto block text-center bg-brand hover:bg-brandLight py-2.5 rounded-lg font-semibold transition">
+                    View &amp; Buy Tickets
+                </a>
+            </div>
+        </article>
+    </div>
+</main>
+
+<script src="/js/auth.js"></script>
+<script>
+    if (typeof AuthService !== 'undefined' && AuthService.isAdmin()) {
+        document.getElementById('admin-movies-link').classList.remove('hidden');
+    }
+</script>
+</body>
+</html>
