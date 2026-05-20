@@ -46,43 +46,50 @@
         <button onclick="toggleSearch()" class="hover:text-brand transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </button>
+        <!--- Main Page Login UI - Start --->
         <div class="relative">
+            <!--- Login Button - Start --->
             <button
                     id="login-button"
                     class="bg-brand hover:bg-pink-600 px-6 py-2 rounded-full font-semibold transition"
                     onclick="login()">
                 Login
             </button>
+            <!--- Login Button - End --->
 
-            <div
-                    id="user-dropdown"
-                    class="hidden absolute right-0 mt-2 w-40 bg-cardbg rounded-xl shadow-lg overflow-hidden z-50"
-            >
-                <a href="#" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Profile</a>
-                <a href="/snacks-user.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Snacks</a>
-                <button
-                        onclick="signOut()"
-                        class="w-full text-left px-4 py-2 text-sm text-brand hover:bg-white/10 transition">
-                    Sign out
-                </button>
-            </div>
-
-            <div
-                    id="admin-dropdown"
-                    class="hidden absolute right-0 mt-2 w-40 bg-cardbg rounded-xl shadow-lg overflow-hidden z-50"
-            >
-                <a href="#" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Movies</a>
-                <a href="/theaters.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Theaters</a>
-                <a href="/theater-admin.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Manage Theaters &amp; Seats</a>
-                <a href="/snacks-admin.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Manage Snacks</a>
-                <a href="#" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Users</a>
-                <button
-                        onclick="signOut()"
-                        class="w-full text-left px-4 py-2 text-sm text-brand hover:bg-white/10 transition">
-                    Sign out
-                </button>
-            </div>
+            <!--- User Options Dropdown - Start --->
+                <!--- Customer - Start --->
+                <div
+                        id="customer-dropdown"
+                        class="hidden absolute right-0 mt-2 w-40 bg-cardbg rounded-xl shadow-lg overflow-hidden z-50"
+                >
+                    <a href="#" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Profile</a>
+                    <button
+                            onclick="signOut()"
+                            class="w-full text-left px-4 py-2 text-sm text-brand hover:bg-white/10 transition">
+                        Sign out
+                    </button>
+                </div>
+                <!--- Customer - End --->
+                <!--- Admin - Start --->
+                <div
+                        id="admin-dropdown"
+                        class="hidden absolute right-0 mt-2 w-40 bg-cardbg rounded-xl shadow-lg overflow-hidden z-50"
+                >
+                    <a href="#" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Movies</a>
+                    <a href="theater-admin.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Manage Theaters &amp; Seats</a>
+                    <a href="snacks-admin.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Manage Snacks</a>
+                    <a href="admin-users.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Manage Users</a>
+                    <button
+                            onclick="signOut()"
+                            class="w-full text-left px-4 py-2 text-sm text-brand hover:bg-white/10 transition">
+                        Sign out
+                    </button>
+                </div>
+                <!--- Admin - Start --->
+            <!--- User Options Dropdown - End --->
         </div>
+        <!--- Main Page Login UI - End --->
     </div>
 </nav>
 
@@ -125,48 +132,88 @@
     </div>
 </section>
 
-<!-- Coming soon / releases teaser (same nav anchor on all pages) -->
-<section id="releases" class="px-10 py-12 border-t border-white/10 scroll-mt-24">
-    <h2 class="text-2xl font-bold mb-4">Releases</h2>
-    <p class="text-gray-400 max-w-2xl">New premieres and limited runs are announced here weekly. Book tickets from <a href="/theaters.html" class="text-brand font-semibold hover:text-pink-400">Theaters</a> once seats open for pre-sale.</p>
-</section>
-
-<!-- Login Popup -->
-<div id="login-popup" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+<!-- Authentication Pop up - Start -->
+<div id="authentication-popup" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-darkbg rounded-2xl shadow-xl p-8 w-full max-w-sm mx-4">
-        <h2 class="text-xl font-semibold text-white mb-6">Sign in</h2>
 
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm text-white mb-1">Email or Username</label>
-                <input type="text" id="login-username" placeholder="Email or Username"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-                <label class="block text-sm text-white mb-1">Password</label>
-                <input type="password" id="login-password" placeholder="Password"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-        </div>
-
-        <div class="mt-6 flex gap-3">
-            <button onclick="submitLogin()"
-                    class="flex-1 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700">
+        <!-- Sign In and Sign Up Tabs - Start -->
+        <div class="flex mb-6 border-b border-white/10">
+            <button id="tab-signin"
+                    onclick="switchAuthTab('signin')"
+                    class="flex-1 text-center pb-3 text-sm font-medium auth-tab-active transition">
                 Sign in
             </button>
-            <button onclick="closeLogin()"
-                    class="flex-1 rounded-lg px-4 py-2 text-sm text-white bg-pink-600 hover:bg-pink-700">
-                Cancel
+            <button id="tab-signup"
+                    onclick="switchAuthTab('signup')"
+                    class="flex-1 text-center pb-3 text-sm font-medium auth-tab-inactive transition">
+                Create account
             </button>
         </div>
+        <!-- Sign In and Sign Up Tabs - End -->
 
-        <!-- ADD THIS LINE BELOW -->
-        <div class="mt-3 text-center text-sm text-gray-400">
-            Don't have an account?
-            <a href="/register.html" class="text-brand font-semibold hover:text-pink-400">Register here</a>
+        <!-- Login Section - Start -->
+        <div id="form-signin">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-white mb-1">Username</label>
+                    <input type="text" id="login-username" placeholder="JohnSmith"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label class="block text-sm text-white mb-1">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+            </div>
+            <p id="login-error" class="text-brand text-xs mt-3 hidden"></p>
+            <div class="mt-6 flex gap-3">
+                <button onclick="submitLogin()"
+                        class="flex-1 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700">
+                    Sign in
+                </button>
+                <button onclick="closeLogin()"
+                        class="flex-1 rounded-lg px-4 py-2 text-sm text-white bg-pink-600 hover:bg-pink-700">
+                    Cancel
+                </button>
+            </div>
         </div>
+        <!-- Login Section - End -->
+        <!-- Sign Up Section - Start -->
+        <div id="form-signup">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-white mb-1">Username</label>
+                    <input type="text" id="signup-username" placeholder="JohnSmith (no spaces)"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label class="block text-sm text-white mb-1">Password</label>
+                    <input type="password" id="signup-password" placeholder="••••••••"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label class="block text-sm text-white mb-1">Confirm Password</label>
+                    <input type="password" id="signup-confirm" placeholder="••••••••"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <p id="signup-error" class="text-brand text-xs mt-3 hidden"></p>
+                <div class="mt-6 flex gap-3">
+                    <button onclick="submitSignup()"
+                            class="flex-1 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700">
+                        Create account
+                    </button>
+                    <button onclick="closeLogin()"
+                            class="flex-1 rounded-lg px-4 py-2 text-sm text-white bg-pink-600 hover:bg-pink-700">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Sign Up Section - End -->
+
     </div>
 </div>
+<!-- Authentication Pop up - End -->
 
 <script src="/js/auth.js"></script>
 <script>
@@ -196,68 +243,180 @@
         movieGrid.innerHTML += card;
     });
 
-    function login(){
-        document.getElementById('login-popup').classList.remove('hidden');
+    let user = {}
+
+    if (sessionStorage.getItem('user')) { //If there already exists a user in session storage
+        user = JSON.parse(sessionStorage.getItem('user')); //Get the data and store in the local variable
+        setAuthenticationButton(user) //Set the login button to the username and adjust the onclick functions
     }
 
+    // Show the authentication Pop Up
+    function login(){
+        switchAuthTab('signin');
+        document.getElementById('authentication-popup').classList.remove('hidden');
+    }
+
+    // Logic for switching the tabs in the authentication pop up
+    function switchAuthTab(tab) {
+        let isSignin;
+        if (tab === 'signin') {
+            isSignin = true;
+        } else {
+            isSignin = false;
+        }
+
+        document.getElementById('form-signin').classList.toggle('hidden', !isSignin); //Set the signin form to be visible (isSignin is True) or not (isSignin is False)
+        document.getElementById('form-signup').classList.toggle('hidden', isSignin); //Set the signup form to be visible (isSignin is False) or not (isSignin is True)
+
+        //Set the signin tab to be active (isSignin is True) or inactive (isSignin is False)
+        document.getElementById('tab-signin').className = `flex-1 text-center pb-3 text-sm font-medium transition ${isSignin ? 'auth-tab-active' : 'auth-tab-inactive'}`;
+
+        //Set the signup tab to be active (isSignin is False) or inactive (isSignin is True)
+        document.getElementById('tab-signup').className = `flex-1 text-center pb-3 text-sm font-medium transition ${!isSignin ? 'auth-tab-active' : 'auth-tab-inactive'}`;
+    }
+
+    //API call when the user presses the signin button to validate if they are registered user
     async function submitLogin() {
-        const username = document.getElementById('login-username').value;
-        const password = document.getElementById('login-password').value;
+        const username = document.getElementById('login-username').value.trim(); //Get the username and remove leading and trailing whitespace
+        const password = document.getElementById('login-password').value.trim(); //Get the password and remove leading and trailing whitespace
+        const err = document.getElementById('login-error'); //Get the HTML tag that will be used to tell the user about any errors
 
-        const result = await AuthService.login(username, password);
+        //Use the authentication service to get check if the login details are right
+        const result = await AuthService.login(username, password); 
 
-        if (result.ok) {
-            closeLogin();
-            applyLoggedInUI(result.user);
+        if (result.ok) { //If the login details are right (returned an OK)
+            closeLogin(); //Close the authentication prompt and clear input fields
+            user = result.user; //Save the user to the local varaible
+            setAuthenticationButton(user); //Change the login button text and function
+          /*
+            // This might not be needed? Will see after the merge
             const next = new URLSearchParams(window.location.search).get('next');
             if (next && next.startsWith('/')) {
                 window.location.href = next;
                 return;
             }
+          */
         } else {
-            alert(result.error);
-        }
-    }
-
-    /** Sync nav button with sessionStorage (shared with snacks checkout). */
-    function applyLoggedInUI(user) {
-        const loginBtn = document.getElementById('login-button');
-        loginBtn.textContent = user.username;
-        if (user.type === 'Admin') {
-            loginBtn.onclick = toggleAdminDropdown;
-        } else {
-            loginBtn.onclick = toggleDropdown;
+            //If the API call did not return an OK
+            err.textContent = result.error; //Set an error message
+            err.classList.remove('hidden'); //Make the tag visible
         }
     }
 
     function restoreSessionUI() {
         const user = AuthService.getCurrentUser();
         if (user) {
-            applyLoggedInUI(user);
+            setAuthenticationButton(user);
         }
     }
 
-    function toggleDropdown() {
-        document.getElementById('user-dropdown').classList.toggle('hidden');
+    function setAuthenticationButton(userData) {
+        const loginBtn = document.getElementById('login-button'); //Get the Login Button's tag data
+        loginBtn.textContent = data.username; //Set the text of the authentication button to be the username
+        if(userData.type === "Admin"){
+            //If the user type is "Admin"
+            loginBtn.onclick = toggleAdminDropdown; //Set the login button function to be the admin dropdown toggle
+        } else {
+            //Otherwise
+            loginBtn.onclick = toggleDropdown; //Set the login button function to be the customer dropdown toggle
+        }
     }
 
-    function toggleAdminDropdown() {
-        document.getElementById('admin-dropdown').classList.toggle('hidden');
+    //API call when the user presses the signup button to register a new user
+    async function submitSignup(){
+        //Grab the relevant HTML tags and data
+        const username = document.getElementById('signup-username').value.trim(); //Get the username and remove leading and trailing whitespace
+        const password = document.getElementById('signup-password').value.trim(); //Get the password and remove leading and trailing whitespace
+        const confirmPassword = document.getElementById('signup-confirm').value.trim(); //Get the second password and remove leading and trailing whitespace
+        const err = document.getElementById('signup-error'); //Get the HTML tag that will be used to tell the user about any errors
+
+        // Make sure that the username and passwords fields are not blank
+        if (!username || !password || !confirmPassword) {
+            err.textContent = 'All fields are required.';
+            err.classList.remove('hidden');
+            return;
+        }
+
+        //Make sure the passwords match
+        if (password !== confirmPassword) {
+            err.textContent = 'Passwords do not match.';
+            err.classList.remove('hidden');
+            return;
+        }
+
+        //Do the api call
+        const res = await fetch('/api/users/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json(); //Save the returned data to a variable
+
+        if (res.ok) {
+            //If the API returned an OK then
+            closeLogin(); //Close the authentication pop up
+
+            // switch to sign-in tab with a success hint
+            login();
+            document.getElementById('login-username').value = username; //Autofill the username field
+            //Reuse the error message tag to tell the user the account was made successfully
+            const errSignin = document.getElementById('login-error');
+            errSignin.textContent = 'Account created! Please sign in.';
+            errSignin.classList.remove('hidden');
+            errSignin.style.color = '#4ade80'; //Set the color of the text to green
+        } else {
+            //Else if the API did not return an Ok then
+            err.textContent = data.error || 'Registration failed.'; //Set an error message
+            err.classList.remove('hidden'); //Make the tag visible
+        }
     }
 
+    //Sign the user out of their session
     function signOut() {
-        AuthService.clearSession();
-        document.getElementById('login-button').textContent = 'Login';
-        document.getElementById('login-button').onclick = login;
+        sessionStorage.removeItem('user'); //Delete the saved user from session storage so that the data doesn't persist between web pages
+        AuthService.clearSession(); //This seems to do the same thing but it's left here to avoid breaking too many things
+      
+        document.getElementById('login-button').textContent = 'Login'; //Reset the text of the authentication button to "Login"
+        document.getElementById('login-button').onclick = login; // Set the onclick function to be the login function
+
+        //Make sure the dropdown menus are hidden
+        document.getElementById('customer-dropdown').classList.add('hidden');
         document.getElementById('user-dropdown').classList.add('hidden');
         document.getElementById('admin-dropdown').classList.add('hidden');
-        closeLogin();
+
+        //Run the close login function to clear the input fields
+        closeLogin()
     }
 
+    //Make the authentication pop up hidden and clear input fields
     function closeLogin() {
-        document.getElementById('login-popup').classList.add('hidden');
+        document.getElementById('authentication-popup').classList.add('hidden'); //Set the pop up to hidden
+        document.getElementById('login-error').classList.add('hidden') //Set the login error message to hidden
+        document.getElementById('signup-error').classList.add('hidden') //Set the sign-up error message to hidden
+
+        //Clear the input fields in the login tab
         document.getElementById('login-username').value = '';
         document.getElementById('login-password').value = '';
+
+        //Clear the input fields in the signup tab
+        document.getElementById('signup-username').value = '';
+        document.getElementById('signup-password').value = '';
+        document.getElementById('signup-confirm').value = '';
+
+        //Clear the error message fields
+        document.getElementById('login-error').value = '';
+        document.getElementById('signup-error').value = '';
+    }
+
+    //Function to toggle the visibility of the customer dropdown
+    function toggleDropdown() {
+        document.getElementById('customer-dropdown').classList.toggle('hidden');
+    }
+
+    //Function to toggle the visibility of the admin dropdown
+    function toggleAdminDropdown() {
+        document.getElementById('admin-dropdown').classList.toggle('hidden');
     }
 
     // ── SEARCH ──────────────────────────────────────────────────
@@ -296,10 +455,30 @@
             </div>
         `).join('');
     }
+      
+    //There are other ways to do this
     function goToSnacksPage(event) {
         goSnacksNav(event);
     }
+      
+      
+    // === Event Listeners - Start ===
+    //	Monitoring for certain actions done by the user such as clicking somewhere or pressing a certain keyboard key
 
+    // Event Listener for pressing Enter to submit
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            if(!document.getElementById('form-signin').classList.contains('hidden')){submitLogin();}
+            if(!document.getElementById('form-signup').classList.contains('hidden')) {submitSignup();}
+        }
+    });
+
+    // Close authentication popup on backdrop click
+    document.getElementById('authentication-popup').addEventListener('click', function(e) {
+        if (e.target === this) closeLogin();
+    });
+      
+    //I don't know why we need this
     document.addEventListener('DOMContentLoaded', function () {
         restoreSessionUI();
         const p = new URLSearchParams(window.location.search);
@@ -307,6 +486,8 @@
             login();
         }
     });
+
+    // === Event Listeners - End ===
 
 </script>
 </body>

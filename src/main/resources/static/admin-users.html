@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickShow — User Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#ff4d6d',
+                        darkbg: '#0a0a0f',
+                        cardbg: '#161b28',
+                        surface: '#1e2535',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-darkbg text-white min-h-screen">
+
+<!-- Navigation -->
+<nav class="flex items-center justify-between px-10 py-6 border-b border-white/5">
+    <a href="index.html" class="flex items-center space-x-2">
+        <span class="text-2xl font-bold tracking-wider mono"><span class="text-brand">Q</span>uickShow</span>
+    </a>
+
+    <div class="flex flex-col items-center gap-1">
+        <span class="text-xs text-white/75 mono uppercase tracking-widest">Admin Panel</span>
+        <!-- Dropdown -->
+        <div class="relative">
+            <button
+				class="text-xs text-brand mono flex items-center gap-1 cursor-pointer"
+				onclick="document.getElementById('admin-dropdown').classList.toggle('hidden')"
+			>
+                Users
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div
+				id="admin-dropdown"
+				class="absolute left-1/2 -translate-x-1/2 mt-2 w-36 bg-neutral-900 border border-white/10 rounded shadow-lg hidden flex-col z-50 text-center"
+			>
+                <a href="admin-movies.html" class="block text-xs text-white/60 mono px-4 py-2 hover:bg-white/5">Movies</a>
+                <a href="admin-theater.html" class="block text-xs text-white/60 mono px-4 py-2 hover:bg-white/5">Theater</a>
+                <a href="admin-snacks.html" class="block text-xs text-white/60 mono px-4 py-2 hover:bg-white/5">Snacks</a>
+            </div>
+        </div>
+    </div>
+
+    <a href="index.html" class="text-sm text-white/75 hover:text-white transition flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        Back to site
+    </a>
+</nav>
+
+<!-- Main Content -->
+<main class="px-10 py-10 max-w-6xl mx-auto">
+
+    <!-- Header Row -->
+    <div class="flex items-end justify-between mb-10">
+        <div>
+            <h1 class="text-4xl font-semibold">Users</h1>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="openCreateModal('customer')"
+                class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand hover:bg-pink-600 text-sm font-medium transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                New User
+            </button>
+            <button onclick="openCreateModal('admin')"
+                class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand hover:bg-pink-600 text-sm font-medium transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                New Admin
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-3 gap-4 mb-10" id="stats-row">
+        <div class="bg-cardbg rounded-2xl p-5 border border-white/5">
+            <p class="text-xs text-white/40 mono uppercase tracking-widest mb-2">Total Users</p>
+            <p class="text-3xl font-semibold" id="stat-total">—</p>
+        </div>
+        <div class="bg-cardbg rounded-2xl p-5 border border-white/5">
+            <p class="text-xs text-white/40 mono uppercase tracking-widest mb-2">Customers</p>
+            <p class="text-3xl font-semibold" id="stat-customers">—</p>
+        </div>
+        <div class="bg-cardbg rounded-2xl p-5 border border-white/5">
+            <p class="text-xs text-white/40 mono uppercase tracking-widest mb-2">Admins</p>
+            <p class="text-3xl font-semibold" id="stat-admins">—</p>
+        </div>
+    </div>
+
+    <!-- Tabs + Search -->
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex gap-6 rounded-full bg-cardbg px-4 py-2">
+            <button
+				onclick="switchTab('all')"
+				id="tab-all"
+				data-active="true"
+				class="text-sm font-medium rounded-full transition mono px-3 py-1 data-[active=true]:bg-white/10 data-[active=true]:text-white text-white/40"
+			>
+				All
+			</button>
+			<button
+				onclick="switchTab('customer')"
+				id="tab-customer"
+				data-active="false"
+				class="text-sm font-medium rounded-full transition mono px-3 py-1 data-[active=true]:bg-white/10 data-[active=true]:text-white text-white/40"
+			>
+				Customers
+			</button>
+			<button
+				onclick="switchTab('admin')"
+				id="tab-admin"
+				data-active="false"
+				class="text-sm font-medium rounded-full transition mono px-3 py-1 data-[active=true]:bg-white/10 data-[active=true]:text-white text-white/40"
+			>
+				Admins
+			</button>
+        </div>
+        <div class="relative">
+            <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+			</svg>
+            <input type="text" id="search-input" placeholder="Search users…"
+                oninput="filterUsers()"
+                class="input-field pl-9 pr-4 py-3 rounded-full bg-cardbg text-sm text-white w-56" />
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-cardbg rounded-2xl border border-white/5 overflow-hidden">
+        <table class="w-full">
+            <thead>
+                <tr class="border-b border-white/5">
+                    <th class="text-left px-6 py-4 text-xs text-white/30 mono uppercase tracking-widest font-normal">Username</th>
+                    <th class="text-left px-6 py-4 text-xs text-white/30 mono uppercase tracking-widest font-normal">Role</th>
+                    <th class="text-left px-6 py-4 text-xs text-white/30 mono uppercase tracking-widest font-normal">User ID</th>
+                    <th class="px-6 py-4"></th>
+                </tr>
+            </thead>
+            <tbody id="users-tbody">
+                <tr>
+                    <td colspan="4" class="text-center py-16 text-white/20 text-sm">
+                        <div class="spinner mx-auto mb-3"></div>
+                        Loading users…
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</main>
+
+<!-- Create User Modal -->
+<div id="create-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center z-50">
+    <div class="bg-cardbg rounded-2xl shadow-2xl p-8 w-full max-w-sm mx-4 border border-white/8 fade-in">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-lg font-semibold" id="modal-title">Create User</h2>
+            <button onclick="closeCreateModal()" class="text-white/30 hover:text-white transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <div id="create-user-modal" class="space-y-4">
+            <div>
+                <label class="block text-xs text-white/40 mono uppercase tracking-widest mb-2">Username</label>
+                <input type="text" id="create-username" placeholder="e.g. john_doe"
+                    class="input-field w-full px-4 py-2.5 rounded-xl text-sm text-black" />
+            </div>
+            <div>
+                <label class="block text-xs text-white/40 mono uppercase tracking-widest mb-2">Password</label>
+                <input type="password" id="create-password" placeholder="••••••••"
+                    class="input-field w-full px-4 py-2.5 rounded-xl text-sm text-black" />
+            </div>
+        </div>
+
+        <p id="create-error" class="text-brand text-xs mt-3 hidden"></p>
+
+        <div class="mt-6 flex gap-3">
+            <button onclick="submitCreate()"
+                id="create-submit-btn"
+                class="flex-1 bg-brand hover:bg-pink-600 text-white rounded-xl px-4 py-2.5 text-sm font-medium transition flex items-center justify-center gap-2">
+                Create
+            </button>
+            <button onclick="closeCreateModal()"
+                class="flex-1 border border-white/10 hover:border-white/25 rounded-xl px-4 py-2.5 text-sm transition">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="hidden fixed bottom-6 right-6 bg-surface border border-white/10 rounded-xl px-5 py-3 text-sm shadow-xl z-50 flex items-center gap-3">
+    <span id="toast-icon" class="text-base">✓</span>
+    <span id="toast-msg"></span>
+</div>
+
+<script>
+    let allUsers = []; //A list of all the users
+    let currentTab = 'all'; //Which filter is currently active
+    let createType = 'customer'; //Sets the customer type about to be created
+    const user = JSON.parse(sessionStorage.getItem('user'));
+    let updatingUser = {};
+
+    // === Fetch all the users - Start ===
+    async function loadUsers() {
+        try { //try to get data using the API
+			//get all the users from the database
+            allUsers = await (await fetch('/api/users')).json();
+
+            updateStats();
+            renderTable();
+        } catch (e) { //If that fails show a message
+            document.getElementById('users-tbody').innerHTML = `<tr><td colspan="4" class="text-center py-16 text-white/20 text-sm">Failed to load users.</td></tr>`;
+        }
+    }
+	// === Fetch all the users- End ===
+
+	// === Update the stats section - Start ===
+    function updateStats() {
+        const admins = allUsers.filter(u => u.type === 'ADMIN');
+        const customers = allUsers.filter(u => u.type !== 'ADMIN');
+        document.getElementById('stat-total').textContent = allUsers.length;
+        document.getElementById('stat-customers').textContent = customers.length;
+        document.getElementById('stat-admins').textContent = admins.length;
+    }
+	// === Update the stats section - End ===
+
+	// === Render the table to show users - Start ===
+    function renderTable() {
+        const search = document.getElementById('search-input').value.toLowerCase(); //Get the search input field from the page
+
+		//Filter users shown in the table based on the current filter tab selected and username entered into the search field
+        let filtered = allUsers.filter(u => {
+			//Create a matchTab variable and assign it a boolean value based on certain criteria
+            const matchTab = currentTab === 'all' //Is the current filter tab "All"
+                || (currentTab === 'admin' && u.type === 'ADMIN') //Is the current filter tab "admin" AND is the user of type "Admin"
+                || (currentTab === 'customer' && u.type === 'CUSTOMER'); //Is the current filter tab "customer" AND is the user not of type "Admin:
+
+			//Create a matchSearch variable and assign it a boolean value based on certain criteria
+			const matchSearch = !search //Is the search input field empty
+				|| u.username.toLowerCase().includes(search); //Does the user's username include the string entered into the search field
+
+			return matchTab && matchSearch;
+        });
+
+		//If no users were found (i.e. filter.length = 0)
+        if (!filtered.length) {
+			//Inform the user that no such users exist
+            document.getElementById('users-tbody').innerHTML = `<tr><td colspan="4" class="text-center py-16 text-white/20 text-sm">No users found.</td></tr>`;
+            return;
+        }
+
+		//Otherwise create a row for each user and update the table
+        document.getElementById('users-tbody').innerHTML = filtered.map(u => `
+            <tr class="table-row border-b border-white/4 fade-in">
+                <td class="px-6 py-4 text-sm font-medium">${u.username}</td>
+                <td class="px-6 py-4">
+                    <span class="text-xs px-2.5 py-1 rounded-full mono ${u.type === 'ADMIN' ? 'bg-brand/20' : 'bg-cardbg'}">
+                        ${u.type}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-white mono">${u.id ?? '—'}</td>
+                <td class="px-6 py-4 text-right">
+					<button
+						onclick="updateUser('${u.id}')"
+						class = "text-xs text-white/75 hover:text-brand transition px-3 py-1 rounded-lg hover:bg-brand/10"
+					>
+						<i class="fa-solid fa-pen-to-square"></i>
+					</button>
+                    <button
+						onclick="deleteUser('${u.id}', '${u.username}')"
+                        class="text-xs text-white/75 hover:text-brand transition px-3 py-1 rounded-lg hover:bg-brand/10"
+					>
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+	// === Render the table to show users - End ===
+
+    // === Tab switching logic - Start ===
+	function switchTab(tab) {
+		document.querySelectorAll('[id^="tab-"]').forEach(btn => btn.dataset.active = "false");
+		document.getElementById('tab-' + tab).dataset.active = "true";
+		renderTable();
+	}
+	// === Tab switching logic - End ===
+
+	// === Filtering Users (including search) - Start ===
+    function filterUsers() { renderTable(); }
+	// === Filtering Users (including search) - End ===
+
+    // === Open the User creation Modal - Start ===
+    function openCreateModal(operationType, userData={}) {
+        const { username = '', password = '', id: userID = '', type = '' } = userData;
+        updatingUser = userData;
+        createType = operationType; //Set the type of user being made
+        document.getElementById('modal-title').textContent = (operationType === 'admin' ? 'Create Admin' : (operationType === 'update' ? 'Update User' : 'Create User')); //Set the title of the popup
+
+        if (operationType === 'update') {
+            document.getElementById('create-username').value = username;
+            document.getElementById('create-password').value = password;
+            document.getElementById('create-submit-btn').textContent = 'Update';
+        } else {
+            document.getElementById('create-username').value = '';
+            document.getElementById('create-password').value = '';
+            document.getElementById('create-submit-btn').textContent = 'Create';
+        }
+
+        // Show/hide checkbox
+        const existing = document.getElementById('update-checkbox-wrapper');
+        if (existing) existing.remove();
+
+        if (operationType === 'update') {
+            const wrapper = document.createElement('div');
+            wrapper.id = 'update-checkbox-wrapper';
+            wrapper.innerHTML = `
+            <label class="flex items-center gap-2 text-xs text-white/50 mono cursor-pointer">
+                <input type="checkbox" id="update-checkbox" class="accent-brand" />
+                User type is Admin:
+            </label>
+        `;
+            document.getElementById('create-user-modal').appendChild(wrapper);
+            document.getElementById('update-checkbox').checked = (type === 'ADMIN');
+        }
+
+		document.getElementById('create-error').classList.add('hidden'); //Make sure the error message is hidden
+
+        document.getElementById('create-modal').classList.remove('hidden'); //Make the popup visible
+    }
+
+	// === Close / Hide the user creation popup - Start ===
+    function closeCreateModal() {
+        document.getElementById('create-modal').classList.add('hidden');
+        updatingUser = {};
+    }
+	// === Close / Hide the user creation popup - End ===
+
+	// === Submit the new user data to create and save the user in the database - Start ===
+    async function submitCreate() {
+		//Get the username and password from the input fields and remove any leading or trailing whitespace
+        const username = document.getElementById('create-username').value.trim();
+        const password = document.getElementById('create-password').value.trim();
+
+		//Get the HTML tag we will use to display any error messages
+        const err = document.getElementById('create-error');
+
+		//Get the button the used to submit the data (used later to show loading)
+        const btn = document.getElementById('create-submit-btn');
+
+		//Check that the input fields are not empty
+        if (!username || !password) {
+            showError(err, 'Username and password are required.');
+            return;
+        }
+
+		//Disable the button while the API calls are being made
+        btn.disabled = true;
+
+		//Create a variable "endpoint" that will hold the API link
+		//	It uses the createType variable to decide if the API should register a customer or an admin
+        const endpoint = (createType === 'admin'
+            ? '/api/users/register/admin'
+            : (createType === 'update'
+                ? '/api/users/update'
+                : '/api/users/register')
+            );
+
+		try { //Try to send data to the API
+            const creatorID = user.userId;
+
+            const body = createType === 'update'
+                ? { userID: updatingUser.id, newUsername: username, newPassword: password, makeAdmin: document.getElementById('update-checkbox').checked }
+                : createType === 'admin'
+                    ? { username, password, creatorID }
+                    : { username, password };
+
+            //POST or PUT (update) the data to the API
+            const res = await fetch(endpoint, {
+                method: createType === 'update' ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+
+            const data = await res.json(); //Save the response
+
+            if (res.ok) {//If the response was OK
+                closeCreateModal(); //Close the user creation popup
+                if(createType === 'update') {
+                    showToast(`✓ ${username} was successfully updated`, 'success');
+                } else {
+                    showToast(`✓ ${createType === 'admin' ? 'Admin' : 'User'} "${username}" created.`, 'success'); //Show a small popup stating the user was made successfully
+                }
+                await loadUsers(); //Reload all the users
+            } else { //Otherwise
+				//Inform the user using an appropriate error message
+                showError(err, data.error || 'Something went wrong.');
+            }
+        } catch { //Catch any error that occurs as part of the API call
+            showError(err, 'Network error.'); //Inform the user that there was a network issue
+        }
+
+        btn.disabled = false; //Enable the button
+    }
+	// === Submit the new user data to create and save the user in the database - Start ===
+
+    // === Delete User - Start ===
+    async function deleteUser(userID, username) {
+        //Make sure that user doesn't delete themselves
+        if(userID === user.userID){
+            alert("Cannot delete yourself");
+            return
+        }
+
+        //Make sure the user to remove is the correct one
+        if (!confirm(`Remove user "${username}"?`)) return;
+
+		//Try to make an API call to delete the user
+        try {
+			//Send a DELETE request to the API endpoint
+            const res = await fetch(`/api/users/delete`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({userID}),
+            });
+
+            if (res.ok) { //If the response was OK
+                showToast(`Removed user "${username}".`, 'neutral'); //Inform the user that the operation was successful
+                await loadUsers(); //Reload all the users
+            } else { //Otherwise
+                showToast('Failed to remove user.', 'error'); //Inform the user that the operation failed
+            }
+        } catch { //Catch any error that occurs as part of the API call
+            showToast('Network error.', 'error'); //Inform the user that there was a network issue
+        }
+    }
+	// === Delete User - End ===
+
+	async function updateUser(userID) {
+        const res = await fetch(`/api/users/userid`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({userID}),
+        });
+
+        if (res.ok) {
+            let focusUser = await res.json();
+            openCreateModal('update', focusUser);
+        } else {
+            showToast('Failed to find user.', 'error');
+        }
+    }
+
+    // === Helper Functions - Start ===
+	//	Functions to provide utility for other functions
+
+	//Function to edit an HTML tag to display an error message
+    function showError(element, msg) {
+        element.textContent = msg; //Set the text of the HTML element to the message
+        element.classList.remove('hidden'); //Make the HTML element visible
+    }
+
+	// === Function to display a small popup to inform the user of something
+    function showToast(msg, type = 'success') {
+		//Get the HTML tags for the toast popup such as
+        const toast = document.getElementById('toast'); // the popup iteself
+        const icon = document.getElementById('toast-icon'); //the icon of the popup
+        const msgEl = document.getElementById('toast-msg'); //the text section of the popup
+
+		//Set the icon and style to be used
+        icon.textContent = type === 'success' ? '✓' : type === 'error' ? '✕' : '·';
+        icon.className = `text-base ${type === 'success' ? 'text-green-400' : type === 'error' ? 'text-brand' : 'text-white/40'}`;
+
+		//Set the message to show to the user
+        msgEl.textContent = msg;
+
+		//Make the popup visible
+        toast.classList.remove('hidden');
+
+		//Make sure the popup disappears after some time (3000ms = 3seconds)
+        setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+	// === Helpers Functions - End ===
+
+	// === Event Listeners - Start ===
+	//	Monitoring for certain actions done by the user such as clicking somewhere or pressing a certain keyboard key
+
+    // Close modal on backdrop click
+    document.getElementById('create-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeCreateModal();
+    });
+
+    // Pressing Enter to submit
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !document.getElementById('create-modal').classList.contains('hidden')) {
+            submitCreate();
+        }
+    });
+
+	// Close dropdown on backdrop click
+	document.addEventListener('click', e => {
+		if (!e.target.closest('.relative')) {
+			document.getElementById('admin-dropdown').classList.add('hidden');
+		}
+	});
+	// === Event Listeners - End ===
+
+    if(user.type === 'Admin') {
+        loadUsers(); //Initialize the page by loading all the users
+    } else {
+        alert("You must be an Admin to see this page")
+        window.location.href = 'index.html';
+    }
+</script>
+</body>
+</html>
