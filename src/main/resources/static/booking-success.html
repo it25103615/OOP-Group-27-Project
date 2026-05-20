@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking confirmed — QuickShow</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+    <a href="/index.html" class="logo"><span>Q</span>uickShow</a>
+    <nav class="nav-main" aria-label="Primary">
+        <a href="/index.html">Home</a>
+        <a href="/theaters.html">Theaters</a>
+    </nav>
+</header>
+
+<main class="container">
+    <section class="booking-card success-card" id="success-box">
+        <h1 class="page-title" style="margin-bottom:1rem">🎬 Booking confirmed</h1>
+        <pre id="success-message" class="success-message"></pre>
+        <div class="success-actions">
+            <a href="/booking-view.html" id="view-booking-link" class="btn btn-brand">View Booking</a>
+            <a href="/index.html" class="btn btn-ghost">Back to Home</a>
+        </div>
+    </section>
+</main>
+
+<script src="/js/cinema-booking.js"></script>
+<script>
+(function () {
+    const p = new URLSearchParams(window.location.search);
+    const movie = p.get('movie') || '—';
+    const theater = p.get('theater') || '—';
+    const date = p.get('date') || '—';
+    const time = p.get('time') || '—';
+    const seats = p.get('seats') || '—';
+
+    const text =
+        'Movie: ' + movie + '\n' +
+        'Theater: ' + theater + '\n' +
+        'Date: ' + date + '\n' +
+        'Time: ' + time + '\n' +
+        'Seats: ' + seats + '\n\n' +
+        'Your booking was successful.\n' +
+        'Enjoy your movie! 🍿';
+
+    document.getElementById('success-message').textContent = text;
+
+    alert(text);
+
+    const last = CinemaBooking.getLastBooking() || {};
+    last.movieTitle = movie;
+    last.theaterName = theater;
+    last.showDate = date;
+    last.showTime = time;
+    last.seatLabels = seats;
+    if (p.get('id')) {
+        last.bookingId = p.get('id');
+        document.getElementById('view-booking-link').href =
+            '/booking-view.html?id=' + encodeURIComponent(p.get('id'));
+    }
+    CinemaBooking.saveLastBooking(last);
+})();
+</script>
+</body>
+</html>
