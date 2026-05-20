@@ -33,8 +33,7 @@ class DataSeeder implements CommandLineRunner {
             Admin admin = new Admin("admin", "admin123");
             adminRepository.save(admin);
 
-            Customer customer = new Customer("John Doe", "jdoe123", 0111231234,
-                    "12 Example Street, Sample Town, Test State");
+            Customer customer = new Customer("JohnDoe", "jdoe123", 0111231234, "12 Example Street, Sample Town, Test State");
             customerRepository.save(customer);
         }
 
@@ -112,7 +111,7 @@ class DataSeeder implements CommandLineRunner {
 
         SnackOrder order = new SnackOrder();
         order.setUserId(customer.getId());
-        order.setUsername(customer.getUserName());
+        order.setUsername(customer.getUsername());
         order.setPlacedAt(placedAt);
         order.setTotalAmount(total);
         order.setItems(new ArrayList<>(lines));

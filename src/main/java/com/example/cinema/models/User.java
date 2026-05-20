@@ -10,8 +10,13 @@ public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
 
-    protected String userName;
+    protected String username;
     protected String password;
+
+    //Needed so we can get the user type
+    //  The variable is set up such that it cannot be updated nor created with a specific type
+    @Column(name = "type", insertable = false, updatable = false)
+    protected String type;
 
     //--- Constructor: Start ---
 
@@ -19,8 +24,8 @@ public class User {
     //  Needs a username and a password
     //  There are no checks being done at this level to determine password strength
     //  Sets the default type to null as we should not have a default user anywhere
-    public User(String userName, String password) {
-        this.userName = userName;
+    public User(String username, String password) {
+        this.username = username;
         this.password = password;
     }
 
@@ -38,19 +43,22 @@ public class User {
       return id;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
     public String getPassword() {
         return password;
     }
 
+    public String getType() {
+        return type;
+    }
     //--- Getters: End ---
     //--- Setters: Start ---
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public void setPassword(String password) {
