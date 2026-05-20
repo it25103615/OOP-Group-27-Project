@@ -155,6 +155,11 @@ const CinemaTheater = (function () {
         return seat.row + '-' + num;
     }
 
+    /** Ticket-style label e.g. A5 (used on payment / success screens). */
+    function formatSeatLabelShort(seat) {
+        return seat.row + seat.seatNumber;
+    }
+
     return {
         loadTheaters,
         loadTheater,
@@ -162,6 +167,7 @@ const CinemaTheater = (function () {
         toggleReserve,
         bookSeat,
         theaterImage,
-        formatSeatLabel
+        formatSeatLabel,
+        formatSeatLabelShort
     };
 })();

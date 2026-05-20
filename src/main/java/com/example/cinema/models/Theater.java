@@ -1,8 +1,15 @@
 package com.example.cinema.models;
 
-// OOP: Encapsulation
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+// OOP: Encapsulation — persisted in H2 via TheaterRepository
+@Entity
+@Table(name = "theaters")
 public class Theater {
 
+    @Id
     private String id;
     private String name;
     private String location;
