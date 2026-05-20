@@ -184,23 +184,45 @@
                 })
             });
 
-            const data = await res.json();
+            let data = {};
+            try {
+                data = await res.json();
+            } catch (e) {
+                showError('❌ Server error. Please try again.');
+                return;
+            }
 
             if (res.ok) {
-                // Show success
-                successMsg.textContent = '🎉 Account created successfully! Redirecting to login...';
+                const displayName = data.username || username;
+                try {
+                    AuthService.setSession({
+                        userId: data.userId ?? data.userID,
+                        username: displayName,
+                        type: data.type || 'Customer'
+                    });
+                } catch (e) {
+                    showError('❌ Account created but sign-in failed. Please log in from home.');
+                    return;
+                }
+
+                successMsg.textContent = '🎉 Welcome, ' + displayName + '!';
                 successMsg.classList.remove('hidden');
 
-                // Clear form
                 ['username','password','confirm-password','phone','billing-address']
                     .forEach(id => document.getElementById(id).value = '');
 
-                const nextUrl = new URLSearchParams(window.location.search).get('next');
-                const target = (nextUrl && nextUrl.startsWith('/')) ? nextUrl : '/index.html';
+                const params = new URLSearchParams(window.location.search);
+                let target = params.get('next') || '/index.html';
+                if (!target.startsWith('/')) {
+                    target = '/index.html';
+                }
+                if (params.get('checkout') === '1') {
+                    target += (target.includes('?') ? '&' : '?') + 'resumeCheckout=1';
+                }
 
                 setTimeout(() => {
                     window.location.href = target;
-                }, 2000);
+                }, 1500);
 
             } else {
                 showError('❌ ' + (data.error || 'Registration failed. Please try again.'));
@@ -221,6 +243,13 @@
         errorMsg.classList.remove('hidden');
         // Scroll to top of card
         errorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function goSnacksNav(event) {
+        if (event) {
+            event.preventDefault();
+        }
+        window.location.href = AuthService.getSnacksPageUrl();
     }
 
     function openLoginFromRegister(event) {
