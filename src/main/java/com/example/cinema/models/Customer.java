@@ -3,7 +3,9 @@ package com.example.cinema.models;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -12,6 +14,7 @@ import java.util.List;
 public class Customer extends User{
     protected int phoneNumber ;
     protected String billingAddresses ;
+    @Transient
     protected List<String> orderHistory ;
     //protected CreditCard creditCard ;
 
@@ -49,6 +52,9 @@ public class Customer extends User{
     }
 
     public void addToOrderHistory(String orderID) {
+        if (this.orderHistory == null) {
+            this.orderHistory = new ArrayList<>();
+        }
         this.orderHistory.add(orderID);
     }
 
