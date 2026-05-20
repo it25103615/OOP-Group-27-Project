@@ -527,3 +527,107 @@ a {
         font-size: 0.55rem;
     }
 }
+
+/* Booking success (theater module only) */
+.success-card {
+    text-align: center;
+    max-width: 520px;
+    margin: 2rem auto;
+}
+
+.success-message {
+    text-align: left;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    white-space: pre-wrap;
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.success-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+/* Admin CRUD tables */
+.admin-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+@media (min-width: 960px) {
+    .admin-layout {
+        grid-template-columns: 1fr 1.2fr;
+    }
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.5rem 0.65rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+}
+
+.data-table th {
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.data-table tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.data-table .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.btn-sm {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-sm-edit {
+    background: rgba(59, 130, 246, 0.25);
+    color: #93c5fd;
+}
+
+.btn-sm-del {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+}
+
+.admin-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.admin-toolbar input,
+.admin-toolbar select {
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+}
