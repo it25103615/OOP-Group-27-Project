@@ -117,7 +117,7 @@ class UserController {
 
         String billingAddress = body.getOrDefault("billingAddress", "");
 
-        Customer customer = new Customer(username, password, phoneNumber, billingAddress);
+        customer = new Customer(username, password, phoneNumber, billingAddress);
         Customer saved = customerRepository.save(customer);
         return ResponseEntity.ok(Map.of(
                 "message", "Registered successfully",

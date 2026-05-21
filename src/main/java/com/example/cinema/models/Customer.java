@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,11 @@ public class Customer extends User{
         super(userName, password);
     }
 
+    public Customer(String username, String password, String phoneNumber, String billingAddress) {
+    }
+
     public Customer() {
+
     }
 
     public int getPhoneNumber() {
@@ -56,6 +61,10 @@ public class Customer extends User{
             this.orderHistory = new ArrayList<>();
         }
         this.orderHistory.add(orderID);
+    }
+
+    public Serializable getUserName() {
+        return null;
     }
 
     //public CreditCard getCreditCard() {return creditCard;}
