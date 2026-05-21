@@ -114,7 +114,7 @@ customer.setPhoneNumber(Integer.parseInt(phoneNumber));
         return ResponseEntity.ok(Map.of(
                 "message", "Registered successfully",
                 "userId", saved.getId(),
-                "username", saved.getUserName(),
+                "username", saved.getUsername(),
                 "type", "Customer"
         ));
     }
