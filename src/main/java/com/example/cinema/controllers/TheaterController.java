@@ -206,6 +206,7 @@ public class TheaterController {
             row.put("name", t.getName());
             row.put("location", t.getLocation());
             row.put("capacity", t.getCapacity());
+            row.put("imagePath", t.getImagePath());
             row.put("availableSeats", theaterService.getAvailableSeats(t.getId()));
             row.put("reservedSeats", theaterService.getReservedSeats(t.getId()));
             result.add(row);
@@ -225,6 +226,7 @@ public class TheaterController {
         body.put("name", theater.getName());
         body.put("location", theater.getLocation());
         body.put("capacity", theater.getCapacity());
+        body.put("imagePath", theater.getImagePath());
         body.put("availableSeats", theaterService.getAvailableSeats(id));
         body.put("reservedSeats", theaterService.getReservedSeats(id));
         return ResponseEntity.ok(body);
