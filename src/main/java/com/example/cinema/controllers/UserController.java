@@ -107,17 +107,9 @@ class UserController {
         Customer customer = new Customer(username, password);
 
         String phoneNumber = body.getOrDefault("phoneNumber", "0000000000");
-        if(phoneNumber.isEmpty()){
-            customer.setPhoneNumber(0);
-        } else {
-            customer.setPhoneNumber(Integer.parseInt(phoneNumber));
-        }
-
+customer.setPhoneNumber(Integer.parseInt(phoneNumber));
         customer.setBillingAddresses(body.getOrDefault("billingAddress", ""));
 
-        String billingAddress = body.getOrDefault("billingAddress", "");
-
-        Customer customer = new Customer(username, password, phoneNumber, billingAddress);
         Customer saved = customerRepository.save(customer);
         return ResponseEntity.ok(Map.of(
                 "message", "Registered successfully",
