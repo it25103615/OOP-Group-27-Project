@@ -7,15 +7,21 @@ const CinemaTheater = (function () {
     const API_THEATERS = '/api/theaters';
     const API_SEATS = '/api/seats';
 
-    const MOCK_THEATERS = [
-        { id: 'T001', name: 'Colombo Cineplex', location: 'Colombo 03', capacity: 220, availableSeats: 117, reservedSeats: 3 },
-        { id: 'T002', name: 'Majestic Cinema', location: 'Bambalapitiya', capacity: 220, availableSeats: 117, reservedSeats: 3 },
-        { id: 'T003', name: 'Liberty Lite Multiplex', location: 'Kandy', capacity: 220, availableSeats: 117, reservedSeats: 3 },
-        { id: 'T004', name: 'Scope Cinemas Negombo', location: 'Negombo', capacity: 220, availableSeats: 117, reservedSeats: 3 },
-        { id: 'T005', name: 'Regal Cinema Jaffna', location: 'Jaffna', capacity: 220, availableSeats: 117, reservedSeats: 3 },
-        { id: 'T006', name: 'Savoy Premier', location: 'Wellawatte', capacity: 220, availableSeats: 117, reservedSeats: 3 },
-        { id: 'T007', name: 'EAP Films Multiplex', location: 'Matara', capacity: 220, availableSeats: 117, reservedSeats: 3 }
+    /** Same files as src/main/resources/static/images (offline fallback only). */
+    const THEATER_IMAGES = [
+        '/images/ChatGPT Image May 20, 2026, 08_36_55 PM.png',
+        '/images/ChatGPT Image May 20, 2026, 08_40_57 PM.png',
+        '/images/ChatGPT Image May 20, 2026, 08_42_43 PM.png',
+        '/images/ChatGPT Image May 20, 2026, 10_44_59 AM.png',
+        '/images/ChatGPT Image May 20, 2026, 10_51_00 AM.png',
+        '/images/ChatGPT Image May 20, 2026, 10_54_09 AM.png',
+        '/images/Galaxy-Theatres-DFX-Auditorium-1024x560.jpg',
+        '/images/Gemini_Generated_Image_ihpj8iihpj8iihpj.png',
+        '/images/pngtree-empty-movie-theater-with-rows-of-vacant-red-seats-leading-to-image_19255538.webp',
+        '/images/modern-home-theater-with-plush-seating-and-ambient-lighting-free-photo.jfif'
     ];
+
+    const MOCK_THEATERS = [];
 
     const mockSeatCache = {};
 
@@ -134,27 +140,14 @@ const CinemaTheater = (function () {
         return body;
     }
 
-    function theaterImage(index) {
-        const imgs = [
-            'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1200&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=1200&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1200&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1574267432553-e623176c1d93?q=80&w=1200&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1598899134739-24c46f58b8c9?q=80&w=1200&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=1200&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1524985069026-dd778a1c3f8c?q=80&w=1200&auto=format&fit=crop',
-            '/images/ChatGPT Image May 20, 2026, 10_44_59 AM.png',
-            '/images/ChatGPT Image May 20, 2026, 10_51_00 AM.png',
-            '/images/ChatGPT Image May 20, 2026, 10_54_09 AM.png',
-            '/images/Gemini_Generated_Image_ihpj8iihpj8iihpj.png',
-            '/image/ChatGPT Image May 20, 2026, 08_36_55 PM.png',
-            '/image/ChatGPT Image May 20, 2026, 08_40_57 PM.png',
-            '/image/ChatGPT Image May 20, 2026, 08_42_43 PM.png',
-            '/image/Galaxy-Theatres-DFX-Auditorium-1024x560.jpg',
-            '/image/pngtree-empty-movie-theater-with-rows-of-vacant-red-seats-leading-to-image_19255538.webp',
+    /** Prefer imagePath from H2 API; otherwise rotate local static/images list. */
+    function resolveTheaterImage(theater, index) {
+        const path = theater && theater.imagePath ? theater.imagePath : THEATER_IMAGES[index % THEATER_IMAGES.length];
+        return encodeURI(path);
+    }
 
-        ];
-        return imgs[index % imgs.length];
+    function theaterImage(index) {
+        return encodeURI(THEATER_IMAGES[index % THEATER_IMAGES.length]);
     }
 
     function formatSeatLabel(seat) {
@@ -177,6 +170,7 @@ const CinemaTheater = (function () {
         toggleReserve,
         bookSeat,
         theaterImage,
+        resolveTheaterImage,
         formatSeatLabel,
         formatSeatLabelShort
     };
