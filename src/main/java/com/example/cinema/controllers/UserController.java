@@ -44,18 +44,18 @@ class UserController {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-	
-	//Get a specific user by ID
-	//	Returns the entry of a specified user
-	@PostMapping("/userid")
+
+    //Get a specific user by ID
+    //	Returns the entry of a specified user
+    @PostMapping("/userid")
     public ResponseEntity<?> getUser(@RequestBody Map<String, String> body) {
         Long id = Long.valueOf(body.get("userID"));
         if (!userRepository.existsById(id)) {
-			return ResponseEntity.status(404).body(Map.of("error", "User not found"));
-		} else {
-			return ResponseEntity.ok(userRepository.findById(id).get());
-		}
-	}
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        } else {
+            return ResponseEntity.ok(userRepository.findById(id).get());
+        }
+    }
 
     //Get all the customers
     // Returns a list of all the users with role CUSTOMER in the database

@@ -14,8 +14,6 @@ public class Theater {
     private String name;
     private String location;
     private int capacity;
-    /** Card image under src/main/resources/static, e.g. /images/theater.png */
-    private String imagePath;
 
     // Default constructor
     public Theater() {
@@ -69,10 +67,6 @@ public class Theater {
         return capacity;
     }
 
-    public String getImagePath() {
-        return imagePath;
-    }
-
     // Setters
     public void setId(String id) {
         this.id = id;
@@ -88,9 +82,5 @@ public class Theater {
 
     public void setCapacity(int capacity) {
         this.capacity = capacity;
-    }
-
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
     }
 }

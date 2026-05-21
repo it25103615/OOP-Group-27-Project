@@ -63,7 +63,7 @@
                 const card = document.createElement('article');
                 card.className = 'theater-card';
                 card.innerHTML =
-                    '<img src="' + CinemaTheater.resolveTheaterImage(t, i) + '" alt="">' +
+                    '<img src="' + CinemaTheater.theaterImage(i) + '" alt="">' +
                     '<section class="theater-card-body">' +
                     '<h2>' + escapeHtml(t.name) + '</h2>' +
                     '<p class="location">' + escapeHtml(t.location || '') + '</p>' +
