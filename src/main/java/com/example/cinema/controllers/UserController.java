@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import jakarta.persistence.EntityManager;
 
 // === Normal Java Imports ===
 import java.util.List;
@@ -28,6 +27,7 @@ import java.util.Map;
 //  /api/users/register - accepts a username and password map and will return a mapping with a message and the userID or will return a bad request if the user already exists or if the username fails a requirements check (e.g: no spaces)
 //  /api/users/register/admin - accepts a username and password map and will return a mapping with a message and the userID or will return a bad request if the user already exists, if the username fails a requirements check (e.g: no spaces), or if the user trying to make the admin account is not an admin themselves
 //  /api/users/delete - accepts a user ID and will return a message if the user was successfully deleted or an error message if there was an issue
+//  /api/users/updateUser - accepts userID, newUsername, newPassword and makeAdmin, will update the existing user with id userID to have the newUsername and newPassword. Will delete the user and create a new one with the correct type depending on the makeAdmin boolean value
 
 @RestController //Declare that this is a controller class
 @RequestMapping("/api/users") //Declare how parts of this controller can be accessed
@@ -37,8 +37,6 @@ class UserController {
     @Autowired private UserRepository userRepository; // access to the users table
     @Autowired private AdminRepository adminRepository; // access to the admins table
     @Autowired private CustomerRepository customerRepository; //access to the customers table
-
-    @Autowired private EntityManager entityManager; //Access to a system to delete created objects
 
     //Get all users
     // Returns a list of ALL the users in the database (i.e. Admins AND Customers)
@@ -107,8 +105,9 @@ class UserController {
         Customer customer = new Customer(username, password);
 
         String phoneNumber = body.getOrDefault("phoneNumber", "0000000000");
-customer.setPhoneNumber(Integer.parseInt(phoneNumber));
-        customer.setBillingAddresses(body.getOrDefault("billingAddress", ""));
+        customer.setPhoneNumber(Integer.parseInt(phoneNumber));
+
+        customer.setBillingAddress(body.getOrDefault("billingAddress", ""));
 
         Customer saved = customerRepository.save(customer);
         return ResponseEntity.ok(Map.of(
@@ -119,32 +118,12 @@ customer.setPhoneNumber(Integer.parseInt(phoneNumber));
         ));
     }
 
-    private static int parsePhoneNumber(String raw) {
-        if (raw == null || raw.isBlank() || "0".equals(raw.trim())) {
-            return 0;
-        }
-        String digits = raw.replaceAll("\\D", "");
-        if (digits.isEmpty()) {
-            return 0;
-        }
-        try {
-            long value = Long.parseLong(digits);
-            if (value > Integer.MAX_VALUE) {
-                return -1;
-            }
-            return (int) value;
-        } catch (NumberFormatException e) {
-            return -1;
-        }
-    }
-
     //Create a new Admin User
     //  Checks if the person making the account is an admin
     //      If they are then create a new Admin account and save it to the database
     //      If not then return an error with an appropriate message
     @PostMapping("/register/admin")
     public ResponseEntity<?> registerAdmin(@RequestBody Map<String, String> body){
-        System.out.println(body);
         String newUserName = (body.get("username")).strip(); // extract the new username from the request body
         String newPassword = (body.get("password")).strip(); // extract the new password from the request body
         Long userIDofPersonMakingAdmin = Long.valueOf(body.get("creatorID")); //extract the userId of the person making the admin account
