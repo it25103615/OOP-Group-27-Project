@@ -4,24 +4,35 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-@Entity  //database create for attribute
-@Table(name = "movie") //uniq name table create
+/**
+ * DOMAIN MODEL — Movie
+ * <p>
+ * Represents one movie listing in the cinema catalog. Mapped to the {@code movie} table.
+ * Used by the public movie list (read-only) and by admin CRUD forms (create/update/delete).
+ */
+@Entity
+@Table(name = "movie")
 public class Movie {
 
-    // Private attributes (Encapsulation)
     @Id
     private String movieId;
-    private String poster; // Stores the image path or URL
+    private String title;
+    /** E.g. Action, Adventure, Sci-Fi */
+    private String genre;
+    private String poster;
     private String summary;
-    private String showtimes; // E.g., "10:00 AM, 1:00 PM, 6:00 PM"
+    /** E.g. "10:00 AM, 1:00 PM, 6:00 PM" */
+    private String showtime;
     private String theaterId;
 
-    // Constructor to initialize the Movie object
-    public Movie(String movieId, String poster, String summary, String showtimes, String theaterId) {
+    public Movie(String movieId, String title, String genre, String poster,
+                 String summary, String showtime, String theaterId) {
         this.movieId = movieId;
+        this.title = title;
+        this.genre = genre;
         this.poster = poster;
         this.summary = summary;
-        this.showtimes = showtimes;
+        this.showtime = showtime;
         this.theaterId = theaterId;
     }
 
@@ -37,6 +48,22 @@ public class Movie {
 
     public void setMovieId(String movieId) {
         this.movieId = movieId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
     }
 
     public String getPoster() {
@@ -55,12 +82,22 @@ public class Movie {
         this.summary = summary;
     }
 
+    /** Used by Thymeleaf forms and the public movie-list page. */
+    public String getShowtime() {
+        return showtime;
+    }
+
+    public void setShowtime(String showtime) {
+        this.showtime = showtime;
+    }
+
+    /** Alias so templates may use either {@code showtime} or {@code showtimes}. */
     public String getShowtimes() {
-        return showtimes;
+        return showtime;
     }
 
     public void setShowtimes(String showtimes) {
-        this.showtimes = showtimes;
+        this.showtime = showtimes;
     }
 
     public String getTheaterId() {
@@ -71,9 +108,9 @@ public class Movie {
         this.theaterId = theaterId;
     }
 
-    // Optional: Override toString() for easier debugging later
     @Override
     public String toString() {
-        return movieId + "," + poster + "," + summary + "," + showtimes + "," + theaterId;
+        return movieId + "," + title + "," + genre + "," + poster + ","
+                + summary + "," + showtime + "," + theaterId;
     }
 }

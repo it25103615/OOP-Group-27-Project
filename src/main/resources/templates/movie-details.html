@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Movie Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { brand: '#ff4d6d', darkbg: '#000000', cardbg: '#141414' } } } }
+    </script>
+</head>
+<body class="bg-darkbg text-white font-sans min-h-screen">
+
+<div class="relative w-full h-[60vh] bg-cover bg-center" th:style="'background-image: url(' + ${movie.poster} + ');'">
+    <div class="absolute inset-0 bg-gradient-to-t from-darkbg via-darkbg/80 to-transparent"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-darkbg via-darkbg/80 to-transparent"></div>
+
+    <div class="absolute bottom-10 left-10 md:left-20 max-w-2xl flex items-end gap-8">
+        <img th:src="${movie.poster}" class="hidden md:block w-48 h-72 object-cover rounded-xl shadow-2xl border border-gray-800" alt="Poster">
+
+        <div>
+            <span class="bg-brand text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block">Now Showing</span>
+            <h1 class="text-4xl md:text-5xl font-bold mb-2" th:text="${movie.title}">Movie Title</h1>
+            <p class="text-gray-300 text-lg mb-6 leading-relaxed" th:text="${movie.summary}">
+                Movie summary goes here...
+            </p>
+            <div class="flex flex-wrap gap-4 text-sm">
+                <div class="bg-cardbg/80 backdrop-blur px-4 py-2 rounded-lg border border-gray-800">
+                    <span class="text-gray-400 block text-xs">Showtimes</span>
+                    <span class="font-semibold" th:text="${movie.showtime}">10:00 AM</span>
+                </div>
+                <div class="bg-cardbg/80 backdrop-blur px-4 py-2 rounded-lg border border-gray-800">
+                    <span class="text-gray-400 block text-xs">Theater</span>
+                    <span class="font-semibold text-brand" th:text="${movie.theaterId}">Hall A</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="px-10 md:px-20 py-16">
+    <div class="bg-cardbg border border-brand/30 rounded-2xl p-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-lg shadow-brand/10">
+        <div>
+            <h3 class="text-2xl font-bold mb-2">Ready to watch?</h3>
+            <p class="text-gray-400">Book your tickets now and enjoy the cinematic experience.</p>
+        </div>
+        <button class="bg-brand hover:opacity-80 px-8 py-3 rounded-full font-bold text-lg transition shadow-lg w-full md:w-auto">
+            Book Tickets Now
+        </button>
+    </div>
+</div>
+
+</body>
+</html>

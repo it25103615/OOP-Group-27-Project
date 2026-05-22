@@ -11,7 +11,7 @@
                 extend: {
                     colors: {
                         brand: '#ff4d6d', // Accent pink/red
-						brandLight: '#A4133c',
+                        brandLight: '#A4133c',
                         darkbg: '#000000', // Main background
                         cardbg: '#141414', // Movie card background
                     }
@@ -57,35 +57,35 @@
             <!--- Login Button - End --->
 
             <!--- User Options Dropdown - Start --->
-                <!--- Customer - Start --->
-                <div
-                        id="customer-dropdown"
-                        class="hidden absolute right-0 mt-2 w-40 bg-cardbg rounded-xl shadow-lg overflow-hidden z-50"
-                >
-                    <a href="#" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Profile</a>
-                    <button
-                            onclick="signOut()"
-                            class="w-full text-left px-4 py-2 text-sm text-brand hover:bg-white/10 transition">
-                        Sign out
-                    </button>
-                </div>
-                <!--- Customer - End --->
-                <!--- Admin - Start --->
-                <div
-                        id="admin-dropdown"
-                        class="hidden absolute right-0 mt-2 w-40 bg-cardbg rounded-xl shadow-lg overflow-hidden z-50"
-                >
-					<a href="/movies/dashboard" class="block px-4 py-2 text-sm hover:bg-white/10">Manage Movies</a>
-                    <a href="theater-admin.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Manage Theaters &amp; Seats</a>
-                    <a href="snacks-admin.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Manage Snacks</a>
-                    <a href="admin-users.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Manage Users</a>
-                    <button
-                            onclick="signOut()"
-                            class="w-full text-left px-4 py-2 text-sm text-brand hover:bg-white/10 transition">
-                        Sign out
-                    </button>
-                </div>
-                <!--- Admin - Start --->
+            <!--- Customer - Start --->
+            <div
+                    id="customer-dropdown"
+                    class="hidden absolute right-0 mt-2 w-40 bg-cardbg rounded-xl shadow-lg overflow-hidden z-50"
+            >
+                <a href="#" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Profile</a>
+                <button
+                        onclick="signOut()"
+                        class="w-full text-left px-4 py-2 text-sm text-brand hover:bg-white/10 transition">
+                    Sign out
+                </button>
+            </div>
+            <!--- Customer - End --->
+            <!--- Admin - Start --->
+            <div
+                    id="admin-dropdown"
+                    class="hidden absolute right-0 mt-2 w-40 bg-cardbg rounded-xl shadow-lg overflow-hidden z-50"
+            >
+                <a href="/movies/dashboard" class="block px-4 py-2 text-sm hover:bg-white/10">Manage Movies</a>
+                <a href="theater-admin.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Manage Theaters &amp; Seats</a>
+                <a href="snacks-admin.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Manage Snacks</a>
+                <a href="admin-users.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Manage Users</a>
+                <button
+                        onclick="signOut()"
+                        class="w-full text-left px-4 py-2 text-sm text-brand hover:bg-white/10 transition">
+                    Sign out
+                </button>
+            </div>
+            <!--- Admin - End --->
             <!--- User Options Dropdown - End --->
         </div>
         <!--- Main Page Login UI - End --->
@@ -109,7 +109,7 @@
 <header class="hero-section h-[600px] flex items-center px-10">
     <div class="max-w-2xl">
         <p class="text-sm font-bold tracking-widest bg-white text-black inline-block px-2 py-1 mb-4 rounded-sm">NOW SHOWING</p>
-		<h1 class="text-5xl md:text-6xl font-bold leading-tight mb-4">Your Next<br>Cinema Night</h1>
+        <h1 class="text-5xl md:text-6xl font-bold leading-tight mb-4">Your Next<br>Cinema Night</h1>
         <p class="text-gray-400 mb-8 leading-relaxed">Browse titles, genres, and showtimes — then book your seats.</p>
         <a href="/movies/list" class="inline-flex items-center gap-2 bg-brand hover:bg-brandLight px-8 py-3 rounded-full font-semibold transition shadow-lg shadow-brand/30">
             Explore Movies <span>→</span>
@@ -119,9 +119,9 @@
 
 <!-- Now Showing Grid -->
 <section id="now-showing" class="px-10 py-16">
-	<div class="flex justify-between items-end mb-8">
-		<h2 class="text-2xl font-bold">Now Showing</h2>
-		<a href="/movies/list" class="text-brand hover:underline text-sm font-medium">View all movies →</a>
+    <div class="flex justify-between items-end mb-8">
+        <h2 class="text-2xl font-bold">Now Showing</h2>
+        <a href="/movies/list" class="text-brand hover:underline text-sm font-medium">View all movies →</a>
     </div>
     <p id="movie-loading" class="text-gray-500 text-sm mb-4">Loading movies from database…</p>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="movie-grid"></div>
@@ -212,7 +212,7 @@
 
 <script src="/js/auth.js"></script>
 <script>
-	/** Live catalog from H2 (file-based) via MovieController — replaces hardcoded demo array. */
+    // Live catalog from H2 (file-based) via MovieController — replaces hardcoded demo array.
     let movies = [];
     let user = {}
 
@@ -220,8 +220,8 @@
         user = JSON.parse(sessionStorage.getItem('user')); //Get the data and store in the local variable
         setAuthenticationButton(user) //Set the login button to the username and adjust the onclick functions
     }
-	
-	async function loadMoviesFromDatabase() {
+
+    async function loadMoviesFromDatabase() {
         const grid = document.getElementById('movie-grid');
         const loading = document.getElementById('movie-loading');
         try {
@@ -277,7 +277,7 @@
         const err = document.getElementById('login-error'); //Get the HTML tag that will be used to tell the user about any errors
 
         //Use the authentication service to get check if the login details are right
-        const result = await AuthService.login(username, password); 
+        const result = await AuthService.login(username, password);
 
         if (result.ok) { //If the login details are right (returned an OK)
             closeLogin(); //Close the authentication prompt and clear input fields
@@ -310,7 +310,7 @@
         if(userData.type === "Admin"){
             //If the user type is "Admin"
             loginBtn.onclick = toggleAdminDropdown; //Set the login button function to be the admin dropdown toggle
-			await fetch('/movies/session/sync', {
+            await fetch('/movies/session/sync', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userType: user.type })
@@ -461,10 +461,10 @@
     document.getElementById('authentication-popup').addEventListener('click', function(e) {
         if (e.target === this) closeLogin();
     });
-      
+
     //I don't know why we need this
     document.addEventListener('DOMContentLoaded', function () {
-		loadMoviesFromDatabase();
+        loadMoviesFromDatabase();
         restoreSessionUI();
         const p = new URLSearchParams(window.location.search);
         if (p.get('login') === '1') {

@@ -1,19 +1,21 @@
 package com.example.cinema.controllers;
 
+import com.example.cinema.repositories.MovieRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class PageController {
+    @Autowired
+    private MovieRepository movieRepository;
 
-    // ✅ Fix: forward directly instead of redirect
+    // database store movies send index.html
+    // "http://localhost:8080/" showing index.html file
     @GetMapping("/")
-    public String showHomePage() {
-        return "forward:/index.html";
-    }
+    public String showHomePage(Model model){
 
-    @GetMapping("/add-movie-form")
-    public String showAddMovieForm() {
-        return "add-movie-form";
+        model.addAttribute("movies",movieRepository.findAll());
+        return "index";
     }
 }
