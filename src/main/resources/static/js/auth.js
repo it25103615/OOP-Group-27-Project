@@ -48,14 +48,16 @@ const AuthService = (function () {
      * @param {object} userData - API response: { userId, username, type }
      */
     function setSession(userData) {
-        if (!userData || userData.userId == null || !userData.username) {
+        const username = userData && (userData.username || userData.userName);
+        const userId = userData && (userData.userId ?? userData.userID);
+        if (!userData || userId == null || !username) {
             throw new Error('Invalid user data — cannot create session.');
         }
         sessionStorage.setItem(
             STORAGE_KEY,
             JSON.stringify({
-                userId: userData.userId,
-                username: userData.username,
+                userId: userId,
+                username: username,
                 type: userData.type || 'Customer'
             })
         );
@@ -111,3 +113,14 @@ const AuthService = (function () {
         login
     };
 })();
+
+/**
+ * Shared nav helper: sends user to the correct Snacks page (customer vs admin).
+ * @param {Event} [event] optional — call preventDefault when used from &lt;a href="#"&gt;
+ */
+function goSnacksNav(event) {
+    if (event) {
+        event.preventDefault();
+    }
+    window.location.href = AuthService.getSnacksPageUrl();
+}

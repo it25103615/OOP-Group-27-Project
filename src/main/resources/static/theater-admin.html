@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Theaters &amp; Seats</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+    <a href="/index.html" class="logo"><span>Q</span>uickShow</a>
+    <nav class="nav-main" aria-label="Primary">
+        <a href="/index.html">Home</a>
+        <a href="/theaters.html">Theaters</a>
+    </nav>
+    <a href="/index.html" class="btn btn-ghost">Back</a>
+</header>
+
+<main class="container">
+    <h1 class="page-title">Theater &amp; Seat management</h1>
+    <p class="page-subtitle">Admin CRUD — view, search, add, edit, and delete theaters and seats (stored in H2).</p>
+
+    <div class="admin-layout">
+        <section class="booking-card">
+            <h2>Theaters</h2>
+            <div class="admin-toolbar">
+                <input type="search" id="theater-search" placeholder="Search name / location">
+                <button type="button" class="btn btn-brand btn-sm" id="theater-search-btn">Search</button>
+                <button type="button" class="btn btn-ghost btn-sm" id="theater-refresh-btn">All</button>
+            </div>
+            <div style="overflow-x:auto">
+                <table class="data-table" id="theater-table">
+                    <thead>
+                    <tr><th>Name</th><th>Location</th><th>Cap.</th><th>Avail.</th><th></th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <h3 style="margin-top:1.5rem;font-size:1rem">Add / edit theater</h3>
+            <form id="theater-form" class="form-grid">
+                <input type="hidden" id="th-id">
+                <div class="form-field">
+                    <label>Name</label>
+                    <input type="text" id="th-name" required>
+                </div>
+                <div class="form-field">
+                    <label>Location</label>
+                    <input type="text" id="th-location" required>
+                </div>
+                <div class="form-field">
+                    <label>Capacity</label>
+                    <input type="number" id="th-capacity" min="50" value="200" required>
+                </div>
+                <div class="form-field" style="align-self:end">
+                    <button type="submit" class="btn btn-brand">Save theater</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="booking-card">
+            <h2>Seats</h2>
+            <div class="admin-toolbar">
+                <select id="seat-theater-select"><option value="">Select theater…</option></select>
+                <input type="search" id="seat-search" placeholder="Search row / status / ID">
+                <button type="button" class="btn btn-brand btn-sm" id="seat-search-btn">Search</button>
+            </div>
+            <div style="overflow-x:auto;max-height:320px;overflow-y:auto">
+                <table class="data-table" id="seat-table">
+                    <thead>
+                    <tr><th>Label</th><th>Type</th><th>Price</th><th>Status</th><th></th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <h3 style="margin-top:1.5rem;font-size:1rem">Add / edit seat</h3>
+            <form id="seat-form" class="form-grid">
+                <input type="hidden" id="st-id">
+                <div class="form-field">
+                    <label>Row</label>
+                    <input type="text" id="st-row" maxlength="2" required>
+                </div>
+                <div class="form-field">
+                    <label>Seat #</label>
+                    <input type="number" id="st-num" min="1" required>
+                </div>
+                <div class="form-field">
+                    <label>Type</label>
+                    <select id="st-type">
+                        <option value="REGULAR">REGULAR</option>
+                        <option value="VIP">VIP</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Price (LKR)</label>
+                    <input type="number" id="st-price" min="0" step="10" value="800" required>
+                </div>
+                <div class="form-field">
+                    <label>Status</label>
+                    <select id="st-status">
+                        <option value="AVAILABLE">AVAILABLE</option>
+                        <option value="RESERVED">RESERVED</option>
+                    </select>
+                </div>
+                <div class="form-field" style="align-self:end">
+                    <button type="submit" class="btn btn-brand">Save seat</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</main>
+
+<script src="/js/auth.js"></script>
+<script src="/js/cinema-theater.js"></script>
+<script>
+(function () {
+    if (typeof AuthService !== 'undefined' && !AuthService.isAdmin()) {
+        alert('Admin access only. Sign in as admin.');
+        window.location.href = '/index.html?login=1';
+        return;
+    }
+
+    const theaterTbody = document.querySelector('#theater-table tbody');
+    const seatTbody = document.querySelector('#seat-table tbody');
+    const seatTheaterSelect = document.getElementById('seat-theater-select');
+    let theatersCache = [];
+
+    loadTheaters();
+
+    document.getElementById('theater-search-btn').addEventListener('click', function () {
+        loadTheaters(document.getElementById('theater-search').value.trim());
+    });
+    document.getElementById('theater-refresh-btn').addEventListener('click', function () {
+        document.getElementById('theater-search').value = '';
+        loadTheaters();
+    });
+
+    document.getElementById('theater-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const id = document.getElementById('th-id').value;
+        const body = {
+            name: document.getElementById('th-name').value.trim(),
+            location: document.getElementById('th-location').value.trim(),
+            capacity: parseInt(document.getElementById('th-capacity').value, 10)
+        };
+        const url = id ? '/api/admin/theaters/' + encodeURIComponent(id) : '/api/admin/theaters';
+        const method = id ? 'PUT' : 'POST';
+        const res = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+            alert('Could not save theater');
+            return;
+        }
+        document.getElementById('theater-form').reset();
+        document.getElementById('th-id').value = '';
+        loadTheaters();
+    });
+
+    seatTheaterSelect.addEventListener('change', function () {
+        loadSeats();
+    });
+    document.getElementById('seat-search-btn').addEventListener('click', loadSeats);
+
+    document.getElementById('seat-form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const theaterId = seatTheaterSelect.value;
+        if (!theaterId) {
+            alert('Select a theater first');
+            return;
+        }
+        const seatId = document.getElementById('st-id').value;
+        const body = {
+            theaterId: theaterId,
+            row: document.getElementById('st-row').value.trim(),
+            seatNumber: parseInt(document.getElementById('st-num').value, 10),
+            seatType: document.getElementById('st-type').value,
+            price: parseFloat(document.getElementById('st-price').value),
+            status: document.getElementById('st-status').value
+        };
+        if (seatId) {
+            const res = await fetch('/api/admin/seats/' + encodeURIComponent(seatId), {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (!res.ok) alert('Update failed');
+        } else {
+            const res = await fetch('/api/admin/seats', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (!res.ok) alert('Add failed (duplicate seat?)');
+        }
+        document.getElementById('seat-form').reset();
+        document.getElementById('st-id').value = '';
+        loadSeats();
+    });
+
+    async function loadTheaters(search) {
+        const q = search ? '?search=' + encodeURIComponent(search) : '';
+        const res = await fetch('/api/admin/theaters' + q);
+        theatersCache = await res.json();
+        theaterTbody.innerHTML = '';
+        seatTheaterSelect.innerHTML = '<option value="">Select theater…</option>';
+        theatersCache.forEach(function (t) {
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td>' + esc(t.name) + '</td>' +
+                '<td>' + esc(t.location) + '</td>' +
+                '<td>' + t.capacity + '</td>' +
+                '<td>' + t.availableSeats + '</td>' +
+                '<td class="actions">' +
+                '<button type="button" class="btn-sm btn-sm-edit" data-act="edit-th">Edit</button>' +
+                '<button type="button" class="btn-sm btn-sm-del" data-act="del-th">Delete</button>' +
+                '<button type="button" class="btn-sm btn-sm-edit" data-act="seats-th">Seats</button>' +
+                '</td>';
+            tr.dataset.id = t.id;
+            tr.dataset.name = t.name;
+            tr.dataset.location = t.location;
+            tr.dataset.capacity = t.capacity;
+            theaterTbody.appendChild(tr);
+
+            const opt = document.createElement('option');
+            opt.value = t.id;
+            opt.textContent = t.name + ' (' + t.location + ')';
+            seatTheaterSelect.appendChild(opt);
+        });
+        bindTheaterActions();
+    }
+
+    function bindTheaterActions() {
+        theaterTbody.querySelectorAll('button').forEach(function (btn) {
+            btn.addEventListener('click', async function () {
+                const tr = btn.closest('tr');
+                const act = btn.dataset.act;
+                if (act === 'edit-th') {
+                    document.getElementById('th-id').value = tr.dataset.id;
+                    document.getElementById('th-name').value = tr.dataset.name;
+                    document.getElementById('th-location').value = tr.dataset.location;
+                    document.getElementById('th-capacity').value = tr.dataset.capacity;
+                } else if (act === 'del-th') {
+                    if (!confirm('Delete theater and all its seats?')) return;
+                    await fetch('/api/admin/theaters/' + encodeURIComponent(tr.dataset.id), { method: 'DELETE' });
+                    loadTheaters();
+                } else if (act === 'seats-th') {
+                    seatTheaterSelect.value = tr.dataset.id;
+                    loadSeats();
+                }
+            });
+        });
+    }
+
+    async function loadSeats() {
+        const theaterId = seatTheaterSelect.value;
+        if (!theaterId) {
+            seatTbody.innerHTML = '';
+            return;
+        }
+        const search = document.getElementById('seat-search').value.trim();
+        const q = '?theaterId=' + encodeURIComponent(theaterId) +
+            (search ? '&search=' + encodeURIComponent(search) : '');
+        const res = await fetch('/api/admin/seats' + q);
+        const seats = await res.json();
+        seatTbody.innerHTML = '';
+        seats.forEach(function (s) {
+            const label = CinemaTheater.formatSeatLabel(s);
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td>' + esc(label) + '</td>' +
+                '<td>' + esc(s.seatType) + '</td>' +
+                '<td>' + s.price + '</td>' +
+                '<td>' + esc(s.status) + '</td>' +
+                '<td class="actions">' +
+                '<button type="button" class="btn-sm btn-sm-edit" data-act="edit-st">Edit</button>' +
+                '<button type="button" class="btn-sm btn-sm-del" data-act="del-st">Delete</button>' +
+                '</td>';
+            tr.dataset.seat = JSON.stringify(s);
+            seatTbody.appendChild(tr);
+        });
+        seatTbody.querySelectorAll('button').forEach(function (btn) {
+            btn.addEventListener('click', async function () {
+                const tr = btn.closest('tr');
+                const s = JSON.parse(tr.dataset.seat);
+                if (btn.dataset.act === 'edit-st') {
+                    document.getElementById('st-id').value = s.seatId;
+                    document.getElementById('st-row').value = s.row;
+                    document.getElementById('st-num').value = s.seatNumber;
+                    document.getElementById('st-type').value = s.seatType;
+                    document.getElementById('st-price').value = s.price;
+                    document.getElementById('st-status').value = s.status;
+                } else {
+                    if (!confirm('Delete seat ' + CinemaTheater.formatSeatLabel(s) + '?')) return;
+                    await fetch('/api/admin/seats/' + encodeURIComponent(s.seatId), { method: 'DELETE' });
+                    loadSeats();
+                }
+            });
+        });
+    }
+
+    function esc(t) {
+        const d = document.createElement('span');
+        d.textContent = t || '';
+        return d.innerHTML;
+    }
+})();
+</script>
+</body>
+</html>

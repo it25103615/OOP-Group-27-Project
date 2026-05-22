@@ -85,7 +85,7 @@
                     Sign out
                 </button>
             </div>
-            <!--- Admin - Start --->
+            <!--- Admin - End --->
             <!--- User Options Dropdown - End --->
         </div>
         <!--- Main Page Login UI - End --->
@@ -212,7 +212,7 @@
 
 <script src="/js/auth.js"></script>
 <script>
-    /** Live catalog from H2 (file-based) via MovieController — replaces hardcoded demo array. */
+    // Live catalog from H2 (file-based) via MovieController — replaces hardcoded demo array.
     let movies = [];
     let user = {}
 
@@ -375,7 +375,7 @@
     function signOut() {
         sessionStorage.removeItem('user'); //Delete the saved user from session storage so that the data doesn't persist between web pages
         AuthService.clearSession(); //This seems to do the same thing, but it's left here to avoid breaking too many things
-
+      
         document.getElementById('login-button').textContent = 'Login'; //Reset the text of the authentication button to "Login"
         document.getElementById('login-button').onclick = login; // Set the onclick function to be the login function
 

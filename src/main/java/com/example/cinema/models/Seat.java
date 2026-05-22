@@ -1,7 +1,14 @@
 package com.example.cinema.models;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 // Encapsulation — private fields with controlled getters/setters
 // Inheritance  — VIPSeat extends this class
+@Entity
+@Table(name = "seats")
 public class Seat {
 
     // Constants prevent types like "Vip" vs "VIP"
@@ -11,8 +18,10 @@ public class Seat {
     public static final String STATUS_AVAILABLE = "AVAILABLE";
     public static final String STATUS_RESERVED  = "RESERVED";
 
+    @Id
     private String seatId;
     private String theaterId;   // which theater this seat belongs to
+    @Column(name = "row_label")
     private String row;    // A, B, C ...
     private int seatNumber;  // 1, 2, 3 ...
     private String seatType; //regular or VIP

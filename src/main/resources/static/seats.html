@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book seats — QuickShow</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+    <a href="/index.html" class="logo"><span>Q</span>uickShow</a>
+    <nav class="nav-main" aria-label="Primary">
+        <a href="/index.html">Home</a>
+        <a href="/index.html#now-showing">Movies</a>
+        <a href="/theaters.html">Theaters</a>
+        <a href="/index.html#releases">Releases</a>
+        <a href="#" onclick="goSnacksNav(event)">Snacks</a>
+    </nav>
+    <div class="header-actions">
+        <a href="/theaters.html" class="btn btn-brand">Theaters</a>
+    </div>
+</header>
+
+<main class="container">
+    <header class="seat-page-header">
+        <h1 class="page-title" id="theater-name">Loading…</h1>
+        <p class="page-subtitle" id="theater-location"></p>
+    </header>
+
+    <p id="loading" class="loading">Loading…</p>
+    <p id="error" class="message error hidden"></p>
+
+    <!-- Step 1: show date, movie, time slot, number of seats to book -->
+    <section id="booking-step" class="booking-card hidden">
+        <h2>Show details</h2>
+        <div class="form-grid">
+            <div class="form-field">
+                <label for="show-date">Date</label>
+                <input type="date" id="show-date" required>
+            </div>
+            <div class="form-field">
+                <label for="ticket-count">Number of bookings (seats)</label>
+                <input type="number" id="ticket-count" min="1" max="12" value="2" required>
+            </div>
+            <div class="form-field">
+                <label for="movie-select">Movie</label>
+                <select id="movie-select" required>
+                    <option value="">Choose a movie…</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="time-select">Time slot</label>
+                <select id="time-select" required disabled>
+                    <option value="">Pick a movie first…</option>
+                </select>
+            </div>
+        </div>
+        <p style="margin-top:1rem;color:var(--muted);font-size:0.85rem;">Choose a date and time slot, then continue to payment after seat selection.</p>
+        <button type="button" class="btn btn-brand" style="margin-top:1rem" id="btn-to-seats">Continue to seat map</button>
+    </section>
+
+    <!-- Step 2: seat map (hidden until step 1 is confirmed) -->
+    <section id="seat-section" class="hidden">
+        <div class="step-summary" id="booking-summary" aria-live="polite"></div>
+        <p style="margin-bottom:1rem"><button type="button" class="btn btn-ghost" id="btn-edit-booking">← Change show details</button></p>
+        <section class="screen" aria-hidden="true">SCREEN</section>
+        <section id="seat-map" class="seat-map"></section>
+        <section class="legend">
+            <span class="legend-item"><span class="legend-swatch available"></span> Available</span>
+            <span class="legend-item"><span class="legend-swatch reserved"></span> Reserved</span>
+            <span class="legend-item"><span class="legend-swatch vip"></span> VIP</span>
+            <span class="legend-item"><span class="legend-swatch selected"></span> Your selection</span>
+        </section>
+    </section>
+</main>
+
+<footer class="selection-panel hidden" id="selection-panel">
+    <p id="selection-text">Select seats on the map.</p>
+    <button type="button" class="btn btn-brand" id="confirm-btn" disabled>Confirm Seats</button>
+</footer>
+
+<!-- After confirm: require login / register (uses same session as snacks checkout) -->
+<div id="auth-modal-removed" class="hidden" style="display:none">
+    <div class="modal-card">
+        <h2 id="auth-title">Complete your booking</h2>
+        <p class="hint">Already registered? Sign in below. New user? Use Register, then return here and sign in.</p>
+        <input type="text" id="modal-username" placeholder="Username" autocomplete="username">
+        <input type="password" id="modal-password" placeholder="Password" autocomplete="current-password">
+        <div class="modal-actions">
+            <button type="button" class="btn btn-brand" id="modal-login-btn">Sign in</button>
+            <p class="link-register">No account? <a id="modal-register-link" href="/register.html">Register</a></p>
+            <button type="button" class="btn btn-ghost" id="modal-cancel-btn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script src="/js/cinema-booking.js"></script>
+<script src="/js/cinema-theater.js"></script>
+<script>
+(function () {
+    const params = new URLSearchParams(window.location.search);
+    const theaterId = params.get('theaterId');
+
+    const loading = document.getElementById('loading');
+    const errorEl = document.getElementById('error');
+    const bookingStep = document.getElementById('booking-step');
+    const seatSection = document.getElementById('seat-section');
+    const seatMap = document.getElementById('seat-map');
+    const selectionPanel = document.getElementById('selection-panel');
+    const selectionText = document.getElementById('selection-text');
+    const confirmBtn = document.getElementById('confirm-btn');
+    const bookingSummary = document.getElementById('booking-summary');
+    let seatsById = {};
+    let theaterName = '';
+    let selectedIds = [];
+    let numTickets = 2;
+    let bookingCtx = {};
+    let allSeats = [];
+    let seatsRendered = false;
+
+    if (!theaterId) {
+        loading.classList.add('hidden');
+        errorEl.textContent = 'Missing theater. Open a venue from Theaters first.';
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    const showDateInput = document.getElementById('show-date');
+    const ticketCountInput = document.getElementById('ticket-count');
+    const movieSelect = document.getElementById('movie-select');
+    const timeSelect = document.getElementById('time-select');
+    const btnToSeats = document.getElementById('btn-to-seats');
+
+    showDateInput.min = CinemaBooking.getMinDateString();
+    showDateInput.value = CinemaBooking.getMinDateString();
+
+    CinemaBooking.getMovies().forEach(function (m) {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = m.title;
+        movieSelect.appendChild(opt);
+    });
+
+    movieSelect.addEventListener('change', function () {
+        timeSelect.innerHTML = '';
+        const mid = movieSelect.value;
+        if (!mid) {
+            timeSelect.disabled = true;
+            timeSelect.appendChild(new Option('Pick a movie first…', ''));
+            return;
+        }
+        const slots = CinemaBooking.getSlotsForMovie(mid);
+        slots.forEach(function (s) {
+            timeSelect.appendChild(new Option(s, s));
+        });
+        timeSelect.disabled = false;
+    });
+
+    movieSelect.dispatchEvent(new Event('change'));
+
+    async function initTheater() {
+        try {
+            const theater = await CinemaTheater.loadTheater(theaterId);
+            theaterName = theater.name;
+            document.getElementById('theater-name').textContent = theater.name;
+            document.getElementById('theater-location').textContent = theater.location || '';
+            loading.classList.add('hidden');
+            bookingStep.classList.remove('hidden');
+        } catch (err) {
+            loading.classList.add('hidden');
+            errorEl.textContent = err.message || 'Failed to load theater.';
+            errorEl.classList.remove('hidden');
+        }
+    }
+
+    initTheater();
+
+    document.getElementById('btn-edit-booking').addEventListener('click', function () {
+        seatSection.classList.add('hidden');
+        selectionPanel.classList.add('hidden');
+        bookingStep.classList.remove('hidden');
+        selectedIds = [];
+        document.querySelectorAll('.seat-btn.selected').forEach(function (b) {
+            b.classList.remove('selected');
+        });
+        updateSelectionUi();
+        window.scrollTo({ top: bookingStep.offsetTop - 24, behavior: 'smooth' });
+    });
+
+    btnToSeats.addEventListener('click', async function () {
+        const date = showDateInput.value;
+        const movieId = movieSelect.value;
+        const time = timeSelect.value;
+        numTickets = parseInt(ticketCountInput.value, 10) || 0;
+
+        if (!date || !movieId || !time) {
+            alert('Please choose date, movie, and a time slot.');
+            return;
+        }
+        if (numTickets < 1 || numTickets > 12) {
+            alert('Number of bookings must be between 1 and 12.');
+            return;
+        }
+
+        const movie = CinemaBooking.getMovieById(movieId);
+        bookingCtx = {
+            date: date,
+            movieId: movieId,
+            movieTitle: movie ? movie.title : '',
+            time: time,
+            numTickets: numTickets
+        };
+
+        bookingSummary.innerHTML =
+            '<strong>' + escapeHtml(bookingCtx.movieTitle) + '</strong> · ' +
+            escapeHtml(bookingCtx.date) + ' · <strong>' + escapeHtml(bookingCtx.time) + '</strong> · ' +
+            bookingCtx.numTickets + ' seat(s)';
+
+        if (!seatsRendered) {
+            try {
+                allSeats = await CinemaTheater.loadSeats(theaterId);
+                if (!allSeats.length) {
+                    alert('No seats configured for this theater.');
+                    return;
+                }
+                renderSeatMap(allSeats);
+                seatsRendered = true;
+            } catch (e2) {
+                alert('Could not load seats.');
+                return;
+            }
+        }
+
+        selectedIds = [];
+        updateSelectionUi();
+        bookingStep.classList.add('hidden');
+        seatSection.classList.remove('hidden');
+        selectionPanel.classList.remove('hidden');
+        window.scrollTo({ top: bookingSummary.offsetTop - 24, behavior: 'smooth' });
+    });
+
+    function escapeHtml(text) {
+        const el = document.createElement('span');
+        el.textContent = text;
+        return el.innerHTML;
+    }
+
+    function renderSeatMap(seats) {
+        seatsById = {};
+        const byRow = {};
+        seats.forEach(function (s) {
+            seatsById[s.seatId] = s;
+            if (!byRow[s.row]) byRow[s.row] = [];
+            byRow[s.row].push(s);
+        });
+        Object.keys(byRow).forEach(function (row) {
+            byRow[row].sort(function (a, b) {
+                return a.seatNumber - b.seatNumber;
+            });
+        });
+
+        seatMap.innerHTML = '';
+        Object.keys(byRow).sort().forEach(function (row) {
+            const rowEl = document.createElement('section');
+            rowEl.className = 'seat-row';
+            rowEl.innerHTML = '<span class="row-label">' + row + '</span>';
+
+            byRow[row].forEach(function (seat, idx) {
+                if (idx === Math.ceil(byRow[row].length / 2)) {
+                    const aisle = document.createElement('span');
+                    aisle.className = 'aisle';
+                    rowEl.appendChild(aisle);
+                }
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = CinemaTheater.formatSeatLabel(seat);
+                btn.title = seat.seatType + ' · LKR ' + seat.price;
+                btn.dataset.seatId = seat.seatId;
+
+                const reserved = seat.status === 'RESERVED';
+                const vip = seat.seatType === 'VIP';
+                btn.className = 'seat-btn ' + (reserved ? 'reserved' : 'available') + (vip ? ' vip' : '');
+
+                if (!reserved) {
+                    btn.addEventListener('click', function () {
+                        toggleSeatSelect(seat.seatId, btn);
+                    });
+                }
+                rowEl.appendChild(btn);
+            });
+            seatMap.appendChild(rowEl);
+        });
+    }
+
+    function toggleSeatSelect(seatId, btn) {
+        const idx = selectedIds.indexOf(seatId);
+        if (idx >= 0) {
+            selectedIds.splice(idx, 1);
+            btn.classList.remove('selected');
+        } else {
+            if (selectedIds.length >= numTickets) {
+                alert('You already picked ' + numTickets + ' seat(s). Deselect one to change.');
+                return;
+            }
+            selectedIds.push(seatId);
+            btn.classList.add('selected');
+        }
+        updateSelectionUi();
+    }
+
+    function updateSelectionUi() {
+        const n = selectedIds.length;
+        let total = 0;
+        selectedIds.forEach(function (id) {
+            const s = seatsById[id];
+            if (s) total += Number(s.price) || 0;
+        });
+        selectionText.innerHTML =
+            'Selected <strong>' + n + '</strong> / <strong>' + numTickets + '</strong> seats · Total <strong>LKR ' +
+            total.toLocaleString() + '</strong>';
+        confirmBtn.disabled = n !== numTickets;
+    }
+
+    confirmBtn.addEventListener('click', function () {
+        if (selectedIds.length !== numTickets) return;
+
+        const labels = selectedIds.map(function (id) {
+            return CinemaTheater.formatSeatLabelShort(seatsById[id]);
+        });
+        let total = 0;
+        selectedIds.forEach(function (id) {
+            total += Number(seatsById[id].price) || 0;
+        });
+
+        const user = typeof AuthService !== 'undefined' ? AuthService.getCurrentUser() : null;
+
+        CinemaBooking.savePendingBooking({
+            theaterId: theaterId,
+            theaterName: theaterName,
+            movieTitle: bookingCtx.movieTitle,
+            movieId: bookingCtx.movieId,
+            showDate: bookingCtx.date,
+            showDateDisplay: CinemaBooking.formatDisplayDate(bookingCtx.date),
+            showTime: bookingCtx.time,
+            seatIds: selectedIds.slice(),
+            seatLabels: labels.join(', '),
+            ticketCount: numTickets,
+            totalAmount: total,
+            username: user ? user.username : null
+        });
+
+        window.location.href = '/payment.html';
+    });
+})();
+</script>
+</body>
+</html>
