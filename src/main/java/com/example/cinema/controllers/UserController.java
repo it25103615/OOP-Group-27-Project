@@ -92,13 +92,19 @@ class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> body){
-        String username = (body.get("username")).strip();
-        String password = (body.get("password")).strip();
+    public ResponseEntity<?> register(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        String password = body.get("password");
+        if (username == null || password == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Username and password are required"));
+        }
+        username = username.strip();
+        password = password.strip();
 
-        if(userRepository.findByUsername(username).isPresent()){
+        if (userRepository.findByUsername(username).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username already exists"));
-        } else if(username.contains(" ")){
+        }
+        if (username.contains(" ")) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username cannot contain spaces"));
         }
 
