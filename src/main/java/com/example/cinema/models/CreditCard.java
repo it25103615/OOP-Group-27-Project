@@ -1,16 +1,40 @@
 package com.example.cinema.models;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "credit_cards")
 public class CreditCard {
-    private String cardHolderName ;
-    private int cardNumber ;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String cardHolderName;
+    private Long cardNumber;
     private String expiry;
     private int cvv;
 
-    public CreditCard(String cardHolderName, int cardNumber, String expiry, int cvv) {
+    // Default constructor (Required by JPA)
+    public CreditCard() {
+    }
+
+    // Parameterized constructor
+    public CreditCard(String cardHolderName, Long cardNumber, String expiry, int cvv) {
         this.cardHolderName = cardHolderName;
         this.cardNumber = cardNumber;
         this.expiry = expiry;
         this.cvv = cvv;
+    }
+
+    // Getters and Setters
+
+    public Long getId() {
+        return id;
     }
 
     public String getCardHolderName() {
@@ -21,11 +45,11 @@ public class CreditCard {
         this.cardHolderName = cardHolderName;
     }
 
-    public int getCardNumber() {
+    public Long getCardNumber() {
         return cardNumber;
     }
 
-    public void setCardNumber(int cardNumber) {
+    public void setCardNumber(Long cardNumber) {
         this.cardNumber = cardNumber;
     }
 
