@@ -1,6 +1,6 @@
 package com.example.cinema.models;
 
-import jakarta.persistence.*;
+import jakarta.persistence.*;//imports all JPA (Java Persistence API) annotations used to map this class to a database table
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -14,8 +14,8 @@ import java.util.List;
 public class SnackOrder {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)//tells the database to auto-increment this value. You don't set it manually — the database assigns 1, 2, 3... automatically
+    private Long orderId; //primary key
 
     private Long userId;
     private String username;
