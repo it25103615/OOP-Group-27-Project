@@ -1,7 +1,6 @@
 package com.example.cinema.services;
 
 import com.example.cinema.models.Seat;
-import com.example.cinema.util.TheaterImages;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -47,21 +46,19 @@ public class TheaterSeatSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (theaterService.isEmpty()) {
-            int imageIndex = 0;
-            for (Object[] v : VENUES) {
-                String name = (String) v[0];
-                String location = (String) v[1];
-                int capacity = (Integer) v[2];
-                String imagePath = TheaterImages.pathForIndex(imageIndex++);
-                String id = theaterService.addTheater(name, location, capacity, imagePath);
-                if (id != null) {
-                    seedSeatsForTheater(id, capacity);
-                }
+        if (!theaterService.isEmpty()) {
+            return;
+        }
+
+        for (Object[] v : VENUES) {
+            String name = (String) v[0];
+            String location = (String) v[1];
+            int capacity = (Integer) v[2];
+            String id = theaterService.addTheater(name, location, capacity);
+            if (id != null) {
+                seedSeatsForTheater(id, capacity);
             }
         }
-        // Existing H2 rows (e.g. after schema add) still get /images paths for the UI
-        theaterService.backfillTheaterImages();
     }
 
     private void seedSeatsForTheater(String theaterId, int capacity) {

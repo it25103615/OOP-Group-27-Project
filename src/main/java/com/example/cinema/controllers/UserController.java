@@ -108,31 +108,20 @@ class UserController {
             return ResponseEntity.badRequest().body(Map.of("error", "Username cannot contain spaces"));
         }
 
-        int phoneNumber = parsePhoneNumber(body.getOrDefault("phoneNumber", "0"));
-        String billingAddress = body.getOrDefault("billingAddress", "");
+        Customer customer = new Customer(username, password);
 
-        Customer saved = customerRepository.save(
-                new Customer(username, password, phoneNumber, billingAddress));
+        String phoneNumber = body.getOrDefault("phoneNumber", "0000000000");
+        customer.setPhoneNumber(Integer.parseInt(phoneNumber));
 
+        customer.setBillingAddress(body.getOrDefault("billingAddress", ""));
+
+        Customer saved = customerRepository.save(customer);
         return ResponseEntity.ok(Map.of(
                 "message", "Registered successfully",
                 "userId", saved.getId(),
                 "username", saved.getUsername(),
                 "type", "Customer"
         ));
-    }
-
-    /** Parses phone from register form; non-digits stripped; invalid values become 0. */
-    private static int parsePhoneNumber(String raw) {
-        if (raw == null || raw.isBlank()) {
-            return 0;
-        }
-        try {
-            String digits = raw.replaceAll("\\D", "");
-            return digits.isEmpty() ? 0 : Integer.parseInt(digits);
-        } catch (NumberFormatException e) {
-            return 0;
-        }
     }
 
     //Create a new Admin User
