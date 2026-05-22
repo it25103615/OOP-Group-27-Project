@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/snacks")
+@RestController //It marks the class as a REST API controller that returns JSON data instead of web pages.
+@RequestMapping("/api/snacks") //It sets the base URL for all endpoints in this class.
 public class SnackController {
 
     @Autowired
@@ -25,7 +25,7 @@ public class SnackController {
     // GET snack by ID
     // URL: GET http://localhost:8080/api/snacks/S001
     @GetMapping("/{snackId}")
-    public ResponseEntity<Snack> getSnackById(@PathVariable String snackId) {
+    public ResponseEntity<Snack> getSnackById(@PathVariable String snackId) {   //@PathVariable grab the variable from the URL and put it into SnackID
         Snack snack = snackService.getSnackById(snackId);
         if (snack == null) {
             return ResponseEntity.notFound().build(); // 404
@@ -37,14 +37,15 @@ public class SnackController {
     // URL: GET http://localhost:8080/api/snacks/category/Food
     @GetMapping("/category/{category}")
     public ResponseEntity<List<Snack>> getSnacksByCategory(@PathVariable String category) {
-        return ResponseEntity.ok(snackService.getSnacksByCategory(category));
+        return ResponseEntity.ok(snackService.getSnacksByCategory(category));  //pulls the category name from the URL Returns all snacks in that category wrapped in a 200 OK
     }
 
     // POST add new snack
     // URL: POST http://localhost:8080/api/snacks
     // Body: { "snackId": "S009", "name": "French Fries", "price": 399.00, "category": "Food", "imagePath": "images/fries.png" }
-    @PostMapping
-    public ResponseEntity<String> addSnack(@RequestBody Snack snack) {
+
+    @PostMapping //used to create/submit new data.
+    public ResponseEntity<String> addSnack(@RequestBody Snack snack) {  //  It reads the JSON body from the incoming HTTP request and converts it into a Java object.
         boolean success = snackService.addSnack(
                 snack.getSnackId(),
                 snack.getName(),
