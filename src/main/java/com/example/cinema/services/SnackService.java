@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@Service // tells Spring "this is a service class" — Spring will manage it and allow
 public class SnackService {
 
     @Autowired
@@ -42,7 +42,7 @@ public class SnackService {
         return snackRepository.findByCategory(category);
     }
 
-    // Validates and adds a new snack to the database
+    // Validates and adds a new snacks to the database
     public boolean addSnack(String snackId, String name, double price,
                             String category, String imagePath) {
         if (snackId == null || snackId.isEmpty()) {
