@@ -96,6 +96,8 @@
 <!-- Search Bar -->
 <div id="search-bar" class="hidden bg-cardbg border-b border-white/10 px-10 py-4">
     <div class="max-w-2xl mx-auto flex gap-3">
+        <!-- sr-only make it visible to screen readers only -->
+        <label for="search-input" class="sr-only">Search movies</label>
         <input type="text" id="search-input" placeholder="Search movies..."
                class="flex-1 bg-darkbg border border-white/20 rounded-full px-6 py-2 text-sm text-white focus:outline-none focus:border-brand"
                oninput="searchMovies()" />
@@ -155,12 +157,12 @@
         <div id="form-signin">
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm text-white mb-1">Username</label>
+                    <label for="login-username" class="block text-sm text-white mb-1">Username</label>
                     <input type="text" id="login-username" placeholder="JohnSmith"
                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
-                    <label class="block text-sm text-white mb-1">Password</label>
+                    <label for="login-password" class="block text-sm text-white mb-1">Password</label>
                     <input type="password" id="login-password" placeholder="••••••••"
                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
@@ -182,17 +184,17 @@
         <div id="form-signup">
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm text-white mb-1">Username</label>
+                    <label for="signup-username" class="block text-sm text-white mb-1">Username</label>
                     <input type="text" id="signup-username" placeholder="JohnSmith (no spaces)"
                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
-                    <label class="block text-sm text-white mb-1">Password</label>
+                    <label for="signup-password" class="block text-sm text-white mb-1">Password</label>
                     <input type="password" id="signup-password" placeholder="••••••••"
                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
-                    <label class="block text-sm text-white mb-1">Confirm Password</label>
+                    <label for="signup-confirm" class="block text-sm text-white mb-1">Confirm Password</label>
                     <input type="password" id="signup-confirm" placeholder="••••••••"
                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
@@ -312,7 +314,7 @@
 
     function setAuthenticationButton(userData) {
         const loginBtn = document.getElementById('login-button'); //Get the Login Button's tag data
-        loginBtn.textContent = data.username; //Set the text of the authentication button to be the username
+        loginBtn.textContent = userData.username; //Set the text of the authentication button to be the username
         if(userData.type === "Admin"){
             //If the user type is "Admin"
             loginBtn.onclick = toggleAdminDropdown; //Set the login button function to be the admin dropdown toggle
@@ -375,7 +377,7 @@
     //Sign the user out of their session
     function signOut() {
         sessionStorage.removeItem('user'); //Delete the saved user from session storage so that the data doesn't persist between web pages
-        AuthService.clearSession(); //This seems to do the same thing but it's left here to avoid breaking too many things
+        AuthService.clearSession(); //This seems to do the same thing, but it's left here to avoid breaking too many things
       
         document.getElementById('login-button').textContent = 'Login'; //Reset the text of the authentication button to "Login"
         document.getElementById('login-button').onclick = login; // Set the onclick function to be the login function
@@ -446,7 +448,7 @@
 
         results.innerHTML = filtered.map(m => `
             <div class="flex items-center gap-3 bg-darkbg rounded-xl px-4 py-3 hover:bg-white/5 transition cursor-pointer">
-                <img src="${m.image}" class="w-12 h-12 rounded-lg object-cover">
+                <img src="${m.image}" alt="Poster for movie ${m.title}"class="w-12 h-12 rounded-lg object-cover">
                 <div>
                     <p class="font-semibold text-sm">${m.title}</p>
                     <p class="text-xs text-gray-400">${m.year} • ${m.genre}</p>
