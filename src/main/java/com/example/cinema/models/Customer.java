@@ -1,9 +1,6 @@
 package com.example.cinema.models;
 
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +13,10 @@ public class Customer extends User{
     protected String billingAddress ;
     @Transient
     protected List<String> orderHistory ;
-    //protected CreditCard creditCard ;
+
+    @ManyToOne
+    @JoinColumn(name = "credit_card_id")
+    protected CreditCard creditCard ;
 
     public Customer(String userName, String password, int phoneNumber, String billingAddress) {
         super(userName, password);
@@ -58,7 +58,7 @@ public class Customer extends User{
         this.orderHistory.add(orderID);
     }
 
-    //public CreditCard getCreditCard() {return creditCard;}
+    public CreditCard getCreditCard() {return creditCard;}
 
-    //public void setCreditCard(CreditCard creditCard) {this.creditCard = creditCard;}
+    public void setCreditCard(CreditCard creditCard) {this.creditCard = creditCard;}
 }

@@ -8,14 +8,15 @@ import com.example.cinema.models.*;
 import com.example.cinema.repositories.*;
 
 // == Import the springboot modules needed to run the data seeder ===
+import com.example.cinema.services.SeatService;
+import com.example.cinema.services.TheaterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Component //Similar to @Repository or @Controller; springboot will create an instance of @Component
 class DataSeeder implements CommandLineRunner {
@@ -24,6 +25,16 @@ class DataSeeder implements CommandLineRunner {
     @Autowired private CustomerRepository customerRepository;
     @Autowired private SnackRepository snackRepository;
     @Autowired private SnackOrderRepository snackOrderRepository;
+    @Autowired private MovieRepository movieRepository;
+    @Autowired private CreditCardRepository creditCardRepository;
+
+    private final TheaterService theaterService;
+    private final SeatService seatService;
+
+    public DataSeeder(TheaterService theaterService, SeatService seatService) {
+        this.theaterService = theaterService;
+        this.seatService = seatService;
+    }
 
     //CommandLineRunner only has one method "run"
     //  Springboot will look for all instances that implement CommandLineRunner and call their run methods
@@ -34,6 +45,13 @@ class DataSeeder implements CommandLineRunner {
             adminRepository.save(admin);
 
             Customer customer = new Customer("JohnDoe", "jdoe123", 0111231234, "12 Example Street, Sample Town, Test State");
+
+
+            long creditCardNumber = 1234234534564567L;
+            CreditCard creditCard = new CreditCard("John Doe", creditCardNumber, "05/30", 999);
+            creditCardRepository.save(creditCard);
+
+            customer.setCreditCard(creditCard);
             customerRepository.save(customer);
         }
 
@@ -49,7 +67,7 @@ class DataSeeder implements CommandLineRunner {
             snackRepository.save(new Snack("S012", "Mini Burger",    650.00, "Food",     "images/burger.png"));
             snackRepository.save(new Snack("S013", "Pretzel",        300.00, "Food",     "images/pretzel.png"));
 
-// Beverages
+            // Beverages
             snackRepository.save(new Snack("S004", "Coca Cola",      250.00, "Beverage", "images/cola.png"));
             snackRepository.save(new Snack("S005", "Orange Juice",   300.00, "Beverage", "images/juice.png"));
             snackRepository.save(new Snack("S006", "Water Bottle",   150.00, "Beverage", "images/water.png"));
@@ -59,7 +77,7 @@ class DataSeeder implements CommandLineRunner {
             snackRepository.save(new Snack("S017", "Milkshake",      350.00, "Beverage", "images/milkshake.png"));
             snackRepository.save(new Snack("S018", "Hot Chocolate",  320.00, "Beverage", "images/hotchoco.png"));
 
-// Sweets
+            // Sweets
             snackRepository.save(new Snack("S007", "Candy",          100.00, "Sweets",   "images/candy.png"));
             snackRepository.save(new Snack("S008", "Chocolate Bar",  200.00, "Sweets",   "images/chocbar.png"));
             snackRepository.save(new Snack("S019", "Gummy Bears",    150.00, "Sweets",   "images/gummy.png"));
@@ -71,6 +89,64 @@ class DataSeeder implements CommandLineRunner {
 
         if (snackOrderRepository.count() == 0) {
             seedSampleSnackOrders();
+        }
+
+        // Theaters
+        /* name, location, capacity */
+        Object[][] VENUES = {
+                {"Colombo Cineplex", "Colombo 03", 320},
+                {"Majestic Cinema", "Bambalapitiya", 280},
+                {"Royal Grand Cinema", "Kandy", 260},
+                {"Liberty Cine Hub", "Negombo", 200},
+                {"Ocean View Theater", "Galle", 180},
+                /*
+                {"Galaxy Multiplex", "Kurunegala", 240},
+                {"Platinum Screens", "Colombo 07", 350},
+                {"Sapphire Cinema", "Dehiwala", 190},
+                {"Empire Movie Hall", "Matara", 210},
+                {"Nova Cineplex", "Jaffna", 250},
+                {"Skyline Theater", "Nugegoda", 200},
+                {"Metro Gold Cinema", "Wattala", 175},
+                {"Pearl City Movies", "Batticaloa", 160},
+                {"Regal Screen House", "Panadura", 185},
+                {"Infinity Multiplex", "Moratuwa", 230},
+                {"StarLight Cinema", "Trincomalee", 150},
+                {"Golden Frame Theater", "Anuradhapura", 140},
+                {"Liberty Lite Multiplex", "Kandy", 220},
+                {"Scope Cinemas Negombo", "Negombo", 195},
+                {"Savoy Premier", "Wellawatte", 205},
+                {"EAP Films Multiplex", "Matara", 215},
+                {"Regal Cinema Jaffna", "Jaffna", 170}
+                */
+        };
+
+        List<String> theaterIDs = new LinkedList<>();
+
+        if (movieRepository.count() == 0) {
+            for (Object[] v : VENUES) {
+                String name = (String) v[0];
+                String location = (String) v[1];
+                int capacity = (Integer) v[2];
+                String id = theaterService.addTheater(name, location, capacity);
+                if (id != null) {
+                    theaterIDs.add(id);
+                    seedSeatsForTheater(id, capacity);
+                }
+            }
+
+            String[][] movies = {
+                    {"Inception", "Sci-Fi", "inception.jpg", "A thief who steals corporate secrets through dream-sharing technology.", "10:00 AM, 1:00 PM, 6:00 PM"},
+                    {"The Dark Knight", "Action", "dark_knight.jpg", "Batman faces the Joker, a criminal mastermind who plunges Gotham into chaos.", "11:00 AM, 2:30 PM, 7:00 PM"},
+                    {"Interstellar", "Sci-Fi", "interstellar.jpg","A team of explorers travel through a wormhole in space to ensure humanity's survival.", "12:00 PM, 3:30 PM, 8:00 PM"},
+                    {"The Grand Budapest Hotel", "Comedy", "grand_budapest.jpg","The adventures of a legendary hotel concierge and his protégé.", "10:30 AM, 1:30 PM, 5:00 PM"},
+                    {"Parasite", "Thriller", "parasite.jpg","Greed and class discrimination threaten the symbiotic relationship between two families.", "2:00 PM, 5:30 PM, 9:00 PM"}
+            };
+
+            for (int i = 0; i < theaterIDs.size(); i++) {
+                for(int j=0 ; j < movies.length ; j++) {
+                    movieRepository.save(new Movie(String.format("M%03d%03d", (i+1), (j+1)), movies[j][0], movies[j][1], ("../images/movies/" + movies[j][2]), movies[j][3], movies[j][4], theaterIDs.get(i)));
+                }
+            }
         }
     }
 
@@ -116,5 +192,33 @@ class DataSeeder implements CommandLineRunner {
         order.setTotalAmount(total);
         order.setItems(new ArrayList<>(lines));
         return order;
+    }
+
+    private void seedSeatsForTheater(String theaterId, int capacity) {
+        if (capacity >= 300) {
+            seatService.bulkAddSeats(theaterId, "A", "L", 14, Seat.TYPE_REGULAR, 820.0);
+            seatService.bulkAddSeats(theaterId, "M", "P", 12, Seat.TYPE_VIP, 1250.0);
+        } else if (capacity >= 220) {
+            seatService.bulkAddSeats(theaterId, "A", "J", 12, Seat.TYPE_REGULAR, 780.0);
+            seatService.bulkAddSeats(theaterId, "K", "N", 10, Seat.TYPE_VIP, 1180.0);
+        } else if (capacity >= 180) {
+            seatService.bulkAddSeats(theaterId, "A", "H", 11, Seat.TYPE_REGULAR, 750.0);
+            seatService.bulkAddSeats(theaterId, "I", "K", 9, Seat.TYPE_VIP, 1100.0);
+        } else {
+            seatService.bulkAddSeats(theaterId, "A", "F", 10, Seat.TYPE_REGULAR, 700.0);
+            seatService.bulkAddSeats(theaterId, "G", "J", 8, Seat.TYPE_VIP, 1050.0);
+        }
+        reserveOne(theaterId, "A", 1);
+        reserveOne(theaterId, "A", 5);
+        reserveOne(theaterId, "B", 3);
+    }
+
+    private void reserveOne(String theaterId, String row, int seatNumber) {
+        for (Seat s : seatService.getSeatsByTheater(theaterId)) {
+            if (row.equals(s.getRow()) && s.getSeatNumber() == seatNumber) {
+                seatService.reserveSeat(s.getSeatId());
+                break;
+            }
+        }
     }
 }
