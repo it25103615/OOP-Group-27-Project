@@ -48,14 +48,16 @@ const AuthService = (function () {
      * @param {object} userData - API response: { userId, username, type }
      */
     function setSession(userData) {
-        if (!userData || userData.userId == null || !userData.username) {
+        const username = userData && (userData.username || userData.userName);
+        const userId = userData && (userData.userId ?? userData.userID);
+        if (!userData || userId == null || !username) {
             throw new Error('Invalid user data — cannot create session.');
         }
         sessionStorage.setItem(
             STORAGE_KEY,
             JSON.stringify({
-                userId: userData.userId,
-                username: userData.username,
+                userId: userId,
+                username: username,
                 type: userData.type || 'Customer'
             })
         );

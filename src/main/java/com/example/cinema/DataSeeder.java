@@ -111,7 +111,7 @@ class DataSeeder implements CommandLineRunner {
 
         SnackOrder order = new SnackOrder();
         order.setUserId(customer.getId());
-        order.setUsername(customer.getUserName());
+        order.setUsername(customer.getUsername());
         order.setPlacedAt(placedAt);
         order.setTotalAmount(total);
         order.setItems(new ArrayList<>(lines));

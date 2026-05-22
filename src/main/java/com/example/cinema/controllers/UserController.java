@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import jakarta.persistence.EntityManager;
 
 // === Normal Java Imports ===
 import java.util.List;
@@ -28,6 +27,7 @@ import java.util.Map;
 //  /api/users/register - accepts a username and password map and will return a mapping with a message and the userID or will return a bad request if the user already exists or if the username fails a requirements check (e.g: no spaces)
 //  /api/users/register/admin - accepts a username and password map and will return a mapping with a message and the userID or will return a bad request if the user already exists, if the username fails a requirements check (e.g: no spaces), or if the user trying to make the admin account is not an admin themselves
 //  /api/users/delete - accepts a user ID and will return a message if the user was successfully deleted or an error message if there was an issue
+//  /api/users/updateUser - accepts userID, newUsername, newPassword and makeAdmin, will update the existing user with id userID to have the newUsername and newPassword. Will delete the user and create a new one with the correct type depending on the makeAdmin boolean value
 
 @RestController //Declare that this is a controller class
 @RequestMapping("/api/users") //Declare how parts of this controller can be accessed
@@ -38,26 +38,24 @@ class UserController {
     @Autowired private AdminRepository adminRepository; // access to the admins table
     @Autowired private CustomerRepository customerRepository; //access to the customers table
 
-    @Autowired private EntityManager entityManager; //Access to a system to delete created objects
-
     //Get all users
     // Returns a list of ALL the users in the database (i.e. Admins AND Customers)
     @GetMapping // /api/users
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-	
-	//Get a specific user by ID
-	//	Returns the entry of a specified user
-	@PostMapping("/userid")
+
+    //Get a specific user by ID
+    //	Returns the entry of a specified user
+    @PostMapping("/userid")
     public ResponseEntity<?> getUser(@RequestBody Map<String, String> body) {
         Long id = Long.valueOf(body.get("userID"));
         if (!userRepository.existsById(id)) {
-			return ResponseEntity.status(404).body(Map.of("error", "User not found"));
-		} else {
-			return ResponseEntity.ok(userRepository.findById(id).get());
-		}
-	}
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        } else {
+            return ResponseEntity.ok(userRepository.findById(id).get());
+        }
+    }
 
     //Get all the customers
     // Returns a list of all the users with role CUSTOMER in the database
@@ -94,29 +92,36 @@ class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> body){
-        String username = (body.get("username")).strip();
-        String password = (body.get("password")).strip();
+    public ResponseEntity<?> register(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        String password = body.get("password");
+        if (username == null || password == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Username and password are required"));
+        }
+        username = username.strip();
+        password = password.strip();
 
-        if(userRepository.findByUsername(username).isPresent()){
+        if (userRepository.findByUsername(username).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username already exists"));
-        } else if(username.contains(" ")){
+        }
+        if (username.contains(" ")) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username cannot contain spaces"));
         }
 
         Customer customer = new Customer(username, password);
 
         String phoneNumber = body.getOrDefault("phoneNumber", "0000000000");
-        if(phoneNumber.isEmpty()){
-            customer.setPhoneNumber(0);
-        } else {
-            customer.setPhoneNumber(Integer.parseInt(phoneNumber));
-        }
+        customer.setPhoneNumber(Integer.parseInt(phoneNumber));
 
-        customer.setBillingAddresses(body.getOrDefault("billingAddress", ""));
+        customer.setBillingAddress(body.getOrDefault("billingAddress", ""));
 
         Customer saved = customerRepository.save(customer);
-        return ResponseEntity.ok(Map.of("message", "Registered successfully", "userID", saved.getId()));
+        return ResponseEntity.ok(Map.of(
+                "message", "Registered successfully",
+                "userId", saved.getId(),
+                "username", saved.getUsername(),
+                "type", "Customer"
+        ));
     }
 
     //Create a new Admin User
@@ -125,7 +130,6 @@ class UserController {
     //      If not then return an error with an appropriate message
     @PostMapping("/register/admin")
     public ResponseEntity<?> registerAdmin(@RequestBody Map<String, String> body){
-        System.out.println(body);
         String newUserName = (body.get("username")).strip(); // extract the new username from the request body
         String newPassword = (body.get("password")).strip(); // extract the new password from the request body
         Long userIDofPersonMakingAdmin = Long.valueOf(body.get("creatorID")); //extract the userId of the person making the admin account

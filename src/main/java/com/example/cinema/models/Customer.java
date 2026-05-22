@@ -3,7 +3,9 @@ package com.example.cinema.models;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -11,14 +13,15 @@ import java.util.List;
 @DiscriminatorValue("CUSTOMER")
 public class Customer extends User{
     protected int phoneNumber ;
-    protected String billingAddresses ;
+    protected String billingAddress ;
+    @Transient
     protected List<String> orderHistory ;
     //protected CreditCard creditCard ;
 
-    public Customer(String userName, String password, int phoneNumber, String billingAddresses) {
+    public Customer(String userName, String password, int phoneNumber, String billingAddress) {
         super(userName, password);
         this.phoneNumber = phoneNumber;
-        this.billingAddresses = billingAddresses;
+        this.billingAddress = billingAddress;
     }
 
     public Customer(String userName, String password) {
@@ -36,12 +39,12 @@ public class Customer extends User{
         this.phoneNumber = phoneNumber;
     }
 
-    public String getBillingAddresses() {
-        return billingAddresses;
+    public String getBillingAddress() {
+        return billingAddress;
     }
 
-    public void setBillingAddresses(String billingAddresses) {
-        this.billingAddresses = billingAddresses;
+    public void setBillingAddress(String billingAddress) {
+        this.billingAddress = billingAddress;
     }
 
     public List<String> getOrderHistory() {
@@ -49,6 +52,9 @@ public class Customer extends User{
     }
 
     public void addToOrderHistory(String orderID) {
+        if (this.orderHistory == null) {
+            this.orderHistory = new ArrayList<>();
+        }
         this.orderHistory.add(orderID);
     }
 
