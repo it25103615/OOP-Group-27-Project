@@ -11,18 +11,18 @@
                 extend: {
                     colors: {
                         brand: '#ff4d6d', // Accent pink/red
-                        darkbg: '#0a0a0f', // Main background
-                        cardbg: '#161b28', // Movie card background
+						brandLight: '#A4133c',
+                        darkbg: '#000000', // Main background
+                        cardbg: '#141414', // Movie card background
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Custom Hero Background with Gradient Fade */
         .hero-section {
-            background-image: linear-gradient(to right, rgba(10, 10, 15, 0.95) 10%, rgba(10, 10, 15, 0.4) 60%, rgba(10, 10, 15, 0) 100%),
-            url('https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2070&auto=format&fit=crop'); /* Placeholder image */
+            background-image: linear-gradient(to right, rgba(0,0,0,0.95) 10%, rgba(0,0,0,0.5) 60%, transparent),
+            url('https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2070&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
         }
@@ -37,13 +37,12 @@
     </div>
     <div class="hidden md:flex space-x-8 bg-white/10 px-6 py-2 rounded-full backdrop-blur-md">
         <a href="/index.html" class="hover:text-brand transition">Home</a>
-        <a href="/index.html#now-showing" class="hover:text-brand transition">Movies</a>
+        <a href="/movies/list" class="hover:text-brand transition">Movies</a>
         <a href="/theaters.html" class="hover:text-brand transition">Theaters</a>
-        <a href="/index.html#releases" class="hover:text-brand transition">Releases</a>
         <a href="#" onclick="goSnacksNav(event)" class="hover:text-brand transition">Snacks</a>
     </div>
     <div class="flex items-center space-x-6">
-        <button onclick="toggleSearch()" class="hover:text-brand transition">
+        <button onclick="toggleSearch()" class="hover:text-brand transition" aria-label="Search">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </button>
         <!--- Main Page Login UI - Start --->
@@ -51,7 +50,7 @@
             <!--- Login Button - Start --->
             <button
                     id="login-button"
-                    class="bg-brand hover:bg-pink-600 px-6 py-2 rounded-full font-semibold transition"
+                    class="bg-brand hover:bg-brandLight px-6 py-2 rounded-full font-semibold transition"
                     onclick="login()">
                 Login
             </button>
@@ -76,7 +75,7 @@
                         id="admin-dropdown"
                         class="hidden absolute right-0 mt-2 w-40 bg-cardbg rounded-xl shadow-lg overflow-hidden z-50"
                 >
-                    <a href="#" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Movies</a>
+					<a href="/movies/dashboard" class="block px-4 py-2 text-sm hover:bg-white/10">Manage Movies</a>
                     <a href="theater-admin.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Manage Theaters &amp; Seats</a>
                     <a href="snacks-admin.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Manage Snacks</a>
                     <a href="admin-users.html" class="block px-4 py-2 text-sm hover:bg-white/10 transition">Manage Users</a>
@@ -96,10 +95,10 @@
 <!-- Search Bar -->
 <div id="search-bar" class="hidden bg-cardbg border-b border-white/10 px-10 py-4">
     <div class="max-w-2xl mx-auto flex gap-3">
-        <!-- sr-only make it visible to screen readers only -->
+        <!-- "sr-only" = makes it visible to screen readers only -->
         <label for="search-input" class="sr-only">Search movies</label>
         <input type="text" id="search-input" placeholder="Search movies..."
-               class="flex-1 bg-darkbg border border-white/20 rounded-full px-6 py-2 text-sm text-white focus:outline-none focus:border-brand"
+               class="flex-1 bg-darkbg border border-white/20 rounded-full px-6 py-2 text-sm text-white focus:outline-none"
                oninput="searchMovies()" />
         <button onclick="toggleSearch()" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-sm transition">✕ Close</button>
     </div>
@@ -109,29 +108,23 @@
 <!-- Hero Section -->
 <header class="hero-section h-[600px] flex items-center px-10">
     <div class="max-w-2xl">
-        <p class="text-sm font-bold tracking-widest bg-white text-black inline-block px-2 py-1 mb-4 rounded-sm">MARVEL STUDIOS</p>
-        <h1 class="text-6xl font-bold leading-tight mb-4">Guardians<br>of the Galaxy</h1>
-        <div class="flex items-center space-x-4 text-sm text-gray-300 mb-6">
-            <span>Action | Adventure | Sci-Fi</span>
-            <span>📅 2018</span>
-            <span>⏱ 2h 8m</span>
-        </div>
-        <p class="text-gray-400 mb-8 leading-relaxed">
-            In a post-apocalyptic world where cities ride on wheels and consume each other to survive, two people meet in London and try to stop a conspiracy.
-        </p>
-        <button class="bg-brand hover:bg-pink-600 px-8 py-3 rounded-full font-semibold flex items-center space-x-2 transition">
-            <span>Explore Movies</span>
-            <span>→</span>
-        </button>
+        <p class="text-sm font-bold tracking-widest bg-white text-black inline-block px-2 py-1 mb-4 rounded-sm">NOW SHOWING</p>
+		<h1 class="text-5xl md:text-6xl font-bold leading-tight mb-4">Your Next<br>Cinema Night</h1>
+        <p class="text-gray-400 mb-8 leading-relaxed">Browse titles, genres, and showtimes — then book your seats.</p>
+        <a href="/movies/list" class="inline-flex items-center gap-2 bg-brand hover:bg-brandLight px-8 py-3 rounded-full font-semibold transition shadow-lg shadow-brand/30">
+            Explore Movies <span>→</span>
+        </a>
     </div>
 </header>
 
 <!-- Now Showing Grid -->
-<section id="now-showing" class="px-10 py-16 scroll-mt-24">
-    <h2 class="text-2xl font-bold mb-8">Now Showing</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="movie-grid">
-        <!-- Movie cards will be injected here by JavaScript -->
+<section id="now-showing" class="px-10 py-16">
+	<div class="flex justify-between items-end mb-8">
+		<h2 class="text-2xl font-bold">Now Showing</h2>
+		<a href="/movies/list" class="text-brand hover:underline text-sm font-medium">View all movies →</a>
     </div>
+    <p id="movie-loading" class="text-gray-500 text-sm mb-4">Loading movies from database…</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="movie-grid"></div>
 </section>
 
 <!-- Authentication Pop up - Start -->
@@ -219,37 +212,37 @@
 
 <script src="/js/auth.js"></script>
 <script>
-    // JavaScript to dynamically fetch and render movies
-    const movies = [
-        { title: "Zootopia 2", genre: "Animation | Family", year: 2025, duration: "1h 47m", rating: 7.5, image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&q=80" },
-        { title: "Sinners", genre: "Horror | Action", year: 2025, duration: "2h 18m", rating: 7.5, image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=500&q=80" },
-        { title: "Avatar: Fire and Ash", genre: "Science Fiction", year: 2025, duration: "3h 18m", rating: 7.4, image: "https://images.unsplash.com/photo-1618519764620-7403abdbdf9c?w=500&q=80" }
-    ];
-
-    const movieGrid = document.getElementById('movie-grid');
-
-    movies.forEach(movie => {
-        const card = `
-                <div class="bg-cardbg rounded-2xl p-4 flex flex-col transition hover:-translate-y-1 hover:shadow-lg hover:shadow-brand/20">
-                    <img src="${movie.image}" alt="${movie.title}" class="rounded-xl h-64 object-cover w-full mb-4">
-                    <h3 class="text-lg font-bold mb-1">${movie.title}</h3>
-                    <p class="text-xs text-gray-400 mb-4">${movie.year} • ${movie.genre} • ${movie.duration}</p>
-                    <div class="mt-auto flex justify-between items-center">
-                        <a href="/theaters.html" class="bg-brand hover:bg-pink-600 px-4 py-1.5 rounded-full text-sm font-semibold transition inline-block">Buy Tickets</a>
-                        <div class="flex items-center text-sm">
-                            <span class="text-brand mr-1">★</span> ${movie.rating}
-                        </div>
-                    </div>
-                </div>
-            `;
-        movieGrid.innerHTML += card;
-    });
-
+	/** Live catalog from H2 (file-based) via MovieController — replaces hardcoded demo array. */
+    let movies = [];
     let user = {}
 
     if (sessionStorage.getItem('user')) { //If there already exists a user in session storage
         user = JSON.parse(sessionStorage.getItem('user')); //Get the data and store in the local variable
         setAuthenticationButton(user) //Set the login button to the username and adjust the onclick functions
+    }
+	
+	async function loadMoviesFromDatabase() {
+        const grid = document.getElementById('movie-grid');
+        const loading = document.getElementById('movie-loading');
+        try {
+            const res = await fetch('/movies/api/available');
+            movies = await res.json();
+            loading.classList.add('hidden');
+            if (!movies.length) {
+                grid.innerHTML = '<p class="text-gray-500 col-span-4">No movies yet. Admins can add titles from Manage Movies.</p>';
+                return;
+            }
+            grid.innerHTML = movies.slice(0, 8).map(m => `
+                <div class="bg-cardbg border border-brand/20 rounded-2xl p-4 flex flex-col hover:-translate-y-1 hover:shadow-lg hover:shadow-brand/20 transition">
+                    <img src="${m.poster}" alt="${m.title}" class="rounded-xl h-56 object-cover w-full mb-4">
+                    <span class="text-xs text-brand uppercase tracking-wider mb-1">${m.genre || 'General'}</span>
+                    <h3 class="text-lg font-bold mb-1">${m.title}</h3>
+                    <p class="text-xs text-gray-400 mb-4">Showtime: ${m.showtime || 'TBA'}</p>
+                    <a href="/movies/view/${m.movieId}" class="mt-auto bg-brand hover:bg-brandLight px-4 py-1.5 rounded-full text-sm font-semibold text-center">Buy Tickets</a>
+                </div>`).join('');
+        } catch (e) {
+            loading.textContent = 'Could not load movies. Is the server running?';
+        }
     }
 
     // Show the authentication Pop Up
@@ -289,7 +282,7 @@
         if (result.ok) { //If the login details are right (returned an OK)
             closeLogin(); //Close the authentication prompt and clear input fields
             user = result.user; //Save the user to the local varaible
-            setAuthenticationButton(user); //Change the login button text and function
+            await setAuthenticationButton(user); //Change the login button text and function
 
             // Needed to make sure customers cannot access admin pages without admin credentials
             const next = new URLSearchParams(window.location.search).get('next');
@@ -311,12 +304,17 @@
         }
     }
 
-    function setAuthenticationButton(userData) {
+    async function setAuthenticationButton(userData) {
         const loginBtn = document.getElementById('login-button'); //Get the Login Button's tag data
         loginBtn.textContent = userData.username; //Set the text of the authentication button to be the username
         if(userData.type === "Admin"){
             //If the user type is "Admin"
             loginBtn.onclick = toggleAdminDropdown; //Set the login button function to be the admin dropdown toggle
+			await fetch('/movies/session/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userType: user.type })
+            });
         } else {
             //Otherwise
             loginBtn.onclick = toggleDropdown; //Set the login button function to be the customer dropdown toggle
@@ -430,38 +428,24 @@
     }
 
     function searchMovies() {
-        const query = document.getElementById('search-input').value.toLowerCase().trim();
+        const q = document.getElementById('search-input').value.toLowerCase().trim();
         const results = document.getElementById('search-results');
-        if (!query) { results.innerHTML = ''; return; }
-
+        if (!q) { results.innerHTML = ''; return; }
         const filtered = movies.filter(m =>
-            m.title.toLowerCase().includes(query) ||
-            m.genre.toLowerCase().includes(query)
+            (m.title && m.title.toLowerCase().includes(q)) ||
+            (m.genre && m.genre.toLowerCase().includes(q))
         );
-
-        if (filtered.length === 0) {
+        if (!filtered.length) {
             results.innerHTML = '<p class="text-gray-500 text-sm px-2">No movies found.</p>';
             return;
         }
-
         results.innerHTML = filtered.map(m => `
-            <div class="flex items-center gap-3 bg-darkbg rounded-xl px-4 py-3 hover:bg-white/5 transition cursor-pointer">
-                <img src="${m.image}" alt="Poster for movie ${m.title}"class="w-12 h-12 rounded-lg object-cover">
-                <div>
-                    <p class="font-semibold text-sm">${m.title}</p>
-                    <p class="text-xs text-gray-400">${m.year} • ${m.genre}</p>
-                </div>
-                <span class="ml-auto text-brand text-sm font-bold">★ ${m.rating}</span>
-            </div>
-        `).join('');
+            <a href="/movies/view/${m.movieId}" class="flex items-center gap-3 bg-black rounded-xl px-4 py-3 hover:bg-brand/10 transition">
+                <img src="${m.poster}" class="w-12 h-12 rounded-lg object-cover" alt="">
+                <div><p class="font-semibold text-sm">${m.title}</p><p class="text-xs text-gray-400">${m.genre || ''}</p></div>
+            </a>`).join('');
     }
-      
-    //There are other ways to do this
-    function goToSnacksPage(event) {
-        goSnacksNav(event);
-    }
-      
-      
+
     // === Event Listeners - Start ===
     //	Monitoring for certain actions done by the user such as clicking somewhere or pressing a certain keyboard key
 
@@ -480,6 +464,7 @@
       
     //I don't know why we need this
     document.addEventListener('DOMContentLoaded', function () {
+		loadMoviesFromDatabase();
         restoreSessionUI();
         const p = new URLSearchParams(window.location.search);
         if (p.get('login') === '1') {
