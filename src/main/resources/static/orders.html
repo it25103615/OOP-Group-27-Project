@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinema - Order Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+
+<nav class="bg-indigo-600 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-film text-2xl text-indigo-200"></i>
+                <span class="font-bold text-xl tracking-wider text-white">Cinema Admin Panel</span>
+            </div>
+            <div class="text-sm bg-indigo-700 px-3 py-1 rounded-full text-indigo-100">
+                Order Module
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <div class="space-y-6 lg:col-span-1">
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa-solid fa-plus-circle text-indigo-500 mr-2"></i> Create New Order
+                </h2>
+                <form id="createOrderForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Customer ID</label>
+                        <input type="number" id="customerId" required min="1"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                               placeholder="e.g., 1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Total Amount ($)</label>
+                        <input type="number" id="totalAmount" required min="0.01" step="0.01"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                               placeholder="0.00">
+                    </div>
+                    <button type="submit"
+                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg text-sm transition-colors duration-200 flex items-center justify-center space-x-2 shadow-sm">
+                        <i class="fa-solid fa-receipt"></i>
+                        <span>Place Order</span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa-solid fa-filter text-gray-500 mr-2"></i> Filter Orders
+                </h2>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Search by Customer ID</label>
+                        <div class="flex space-x-2">
+                            <input type="number" id="filterCustomerId"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                                   placeholder="Enter ID">
+                            <button onclick="filterOrdersByCustomer()"
+                                    class="bg-gray-800 hover:bg-gray-900 text-white px-4 rounded-lg text-sm transition-colors duration-200">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="loadAllOrders()"
+                            class="w-full border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium py-2 rounded-lg text-xs transition-colors duration-200 text-center block">
+                        Clear Filter / Refresh List
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                        <i class="fa-solid fa-list-check text-indigo-500 mr-2"></i> Live Order Registry
+                    </h2>
+                    <span id="orderCountBadge" class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">0 Orders</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                        <tr class="bg-gray-100 text-gray-600 uppercase text-xs tracking-wider border-b border-gray-200">
+                            <th class="py-3 px-6 font-semibold">Order ID</th>
+                            <th class="py-3 px-6 font-semibold">Customer</th>
+                            <th class="py-3 px-6 font-semibold">Date & Time</th>
+                            <th class="py-3 px-6 font-semibold">Total</th>
+                            <th class="py-3 px-6 font-semibold">Status</th>
+                            <th class="py-3 px-6 font-semibold text-center">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="ordersTableBody" class="text-gray-700 text-sm divide-y divide-gray-100">
+                        <tr>
+                            <td colspan="6" class="text-center py-8 text-gray-400">
+                                <i class="fa-solid fa-spinner animate-spin text-2xl mb-2 text-gray-300 block"></i>
+                                Loading orders dataset...
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    // Update this URL base to point to where your Spring Boot application is deployed
+    const API_BASE_URL = '/api/admin/orders';
+
+    // 1. Initial Load Entrypoint
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAllOrders();
+
+        // Set up form interceptor
+        document.getElementById('createOrderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitNewOrder();
+        });
+    });
+
+    // 2. Fetch All Orders API Endpoint Connector
+    async function loadAllOrders() {
+        try {
+            const response = await fetch(API_BASE_URL);
+            if (!response.ok) throw new Error('API server fetch breakdown.');
+            const orders = await response.json();
+            renderTableData(orders);
+        } catch (error) {
+            showErrorRow(error.message);
+        }
+    }
+
+    // 3. Post New Order Mapping REST call
+    async function submitNewOrder() {
+        const customerId = document.getElementById('customerId').value;
+        const totalAmount = document.getElementById('totalAmount').value;
+
+        const requestPayload = {
+            customer: { id: parseInt(customerId) },
+            totalAmount: parseFloat(totalAmount)
+        };
+
+        try {
+            const response = await fetch(API_BASE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestPayload)
+            });
+
+            if (response.ok) {
+                alert('Order requested successfully via Backend REST Controller!');
+                document.getElementById('createOrderForm').reset();
+                loadAllOrders(); // reload registry dashboard mapping matrix
+            } else {
+                alert('Failed to save order. Make sure Customer ID exists.');
+            }
+        } catch (error) {
+            console.error('Error execution:', error);
+            alert('Connection failure to Spring Boot Engine context.');
+        }
+    }
+
+    // 4. Update Status Request Trigger Call mapping
+    async function changeOrderStatus(orderId, nextStatus) {
+        try {
+            const url = `${API_BASE_URL}/${orderId}/status?status=${nextStatus}`;
+            const response = await fetch(url, { method: 'PUT' });
+
+            if (response.ok) {
+                loadAllOrders();
+            } else {
+                alert('Could not upgrade tracking condition variables.');
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    // 5. Delete Context Endpoint Caller
+    async function dropOrderRecord(orderId) {
+        if (!confirm(`Confirm destruction authorization query sequence for Order Instance Record #${orderId}?`)) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/${orderId}`, { method: 'DELETE' });
+            if (response.ok) {
+                loadAllOrders();
+            } else {
+                alert('Drop execution pipeline failed inside persistence context.');
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    // 6. Filter Query Mapping Controller Fetch
+    async function filterOrdersByCustomer() {
+        const id = document.getElementById('filterCustomerId').value;
+        if (!id) {
+            loadAllOrders();
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/customer/${id}`);
+            if (!response.ok) throw new Error('Failed to load system profile data matches.');
+            const filteredData = await response.json();
+            renderTableData(filteredData);
+        } catch (error) {
+            showErrorRow(`Customer ID matching filter pipeline exception: ${error.message}`);
+        }
+    }
+
+    // 7. Core Frontend Dynamic View Render Engine Utility
+    function renderTableData(ordersList) {
+        const tableBody = document.getElementById('ordersTableBody');
+        document.getElementById('orderCountBadge').innerText = `${ordersList.length} Order(s)`;
+
+        if (ordersList.length === 0) {
+            tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-8 text-gray-400 font-medium">
+                            <i class="fa-regular fa-folder-open text-xl mb-1 block"></i> No order variables matching queries inside entity database.
+                        </td>
+                    </tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = ordersList.map(order => {
+            // Formatting timestamp values safely
+            let dateStr = "N/A";
+            if(order.orderDate) {
+                const d = new Date(order.orderDate);
+                dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            }
+
+            // UI Badge color selection configurations
+            let badgeClass = "bg-gray-100 text-gray-800";
+            if (order.status === "PENDING") badgeClass = "bg-amber-100 text-amber-800 ring-1 ring-amber-600/20";
+            else if (order.status === "COMPLETED") badgeClass = "bg-emerald-100 text-emerald-800 ring-1 ring-emerald-600/20";
+            else if (order.status === "CANCELLED") badgeClass = "bg-rose-100 text-rose-800 ring-1 ring-rose-600/20";
+
+            return `
+                    <tr class="hover:bg-gray-50/70 transition-colors">
+                        <td class="py-4 px-6 font-semibold text-gray-900">#${order.id}</td>
+                        <td class="py-4 px-6">
+                            <div class="flex items-center space-x-2">
+                                <div class="bg-indigo-50 text-indigo-600 h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold">
+                                    C
+                                </div>
+                                <span class="font-medium text-gray-800">ID: ${order.customer ? order.customer.id : 'Anon'}</span>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6 text-gray-500 text-xs">${dateStr}</td>
+                        <td class="py-4 px-6 font-bold text-indigo-600">$${order.totalAmount.toFixed(2)}</td>
+                        <td class="py-4 px-6">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass}">
+                                ${order.status}
+                            </span>
+                        </td>
+                        <td class="py-4 px-6 text-center space-x-1 whitespace-nowrap">
+                            <select onchange="changeOrderStatus(${order.id}, this.value)"
+                                class="text-xs border border-gray-300 rounded px-1 py-1 bg-white focus:ring-1 focus:ring-indigo-500 outline-none text-gray-600 font-medium">
+                                <option value="" disabled selected>Update Status</option>
+                                <option value="PENDING">PENDING</option>
+                                <option value="COMPLETED">COMPLETED</option>
+                                <option value="CANCELLED">CANCELLED</option>
+                            </select>
+
+                            <button onclick="dropOrderRecord(${order.id})"
+                                class="text-rose-500 hover:text-rose-700 p-1.5 rounded hover:bg-rose-50 transition-colors duration-150 inline-block align-middle"
+                                title="Delete Database Entry Object">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+        }).join('');
+    }
+
+    // View interface abstraction tracking context errors logic
+    function showErrorRow(msg) {
+        document.getElementById('ordersTableBody').innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-8 text-rose-500 font-medium bg-rose-50/50">
+                        <i class="fa-solid fa-triangle-exclamation text-xl mb-1 block"></i>
+                        Could not synchronize table views: ${msg} <br>
+                        <span class="text-xs text-gray-400 font-normal">Confirm local Spring Boot backend application engine context is listening on port 8080.</span>
+                    </td>
+                </tr>`;
+    }
+</script>
+</body>
+</html>
