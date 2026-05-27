@@ -27,6 +27,7 @@ class DataSeeder implements CommandLineRunner {
     @Autowired private SnackOrderRepository snackOrderRepository;
     @Autowired private MovieRepository movieRepository;
     @Autowired private CreditCardRepository creditCardRepository;
+    @Autowired private OrderRepository orderRepository;
 
     private final TheaterService theaterService;
     private final SeatService seatService;
@@ -40,18 +41,14 @@ class DataSeeder implements CommandLineRunner {
     //  Springboot will look for all instances that implement CommandLineRunner and call their run methods
     @Override
     public void run(String... args) throws Exception {
+        Customer customer = new Customer("JohnDoe", "jdoe123", 0111231234, "12 Example Street, Sample Town, Test State");
+        CreditCard creditCard = new CreditCard("John Doe", 1234234534564567L, "05/30", 999);
+        customer.setCreditCard(creditCard);
+
         if (userRepository.count() == 0) {
             Admin admin = new Admin("admin", "admin123");
             adminRepository.save(admin);
-
-            Customer customer = new Customer("JohnDoe", "jdoe123", 0111231234, "12 Example Street, Sample Town, Test State");
-
-
-            long creditCardNumber = 1234234534564567L;
-            CreditCard creditCard = new CreditCard("John Doe", creditCardNumber, "05/30", 999);
             creditCardRepository.save(creditCard);
-
-            customer.setCreditCard(creditCard);
             customerRepository.save(customer);
         }
 
@@ -147,6 +144,30 @@ class DataSeeder implements CommandLineRunner {
                     movieRepository.save(new Movie(String.format("M%03d%03d", (i+1), (j+1)), movies[j][0], movies[j][1], ("../images/movies/" + movies[j][2]), movies[j][3], movies[j][4], theaterIDs.get(i)));
                 }
             }
+        }
+
+        if (orderRepository.count() == 0){
+            Order order1 = new Order();
+            order1.setCustomer(customer);
+            order1.setTotalAmount(45.99);
+            order1.setStatus("COMPLETED");
+
+            Order order2 = new Order();
+            order2.setCustomer(customer);
+            order2.setTotalAmount(23.50);
+            order2.setStatus("CANCELLED");
+
+            Order order3 = new Order();
+            order3.setCustomer(customer);
+            order3.setTotalAmount(67.00);
+            order3.setStatus("PENDING");
+
+            Order order4 = new Order();
+            order4.setCustomer(customer);
+            order4.setTotalAmount(12.75);
+            order4.setStatus("COMPLETED");
+
+            orderRepository.saveAll(List.of(order1, order2, order3, order4));
         }
     }
 

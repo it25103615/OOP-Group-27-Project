@@ -5,18 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cinema - Order Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
+	<script>
+		tailwind.config = {
+			theme: {
+				extend: {
+					colors: {
+						brand: '#ff4d6d', // Accent pink/red
+						brandLight: '#A4133c', // Accent dark pink/red
+						darkbg: '#000000', // Main background
+						cardbg: '#141414', // Movie card background
+					}
+				}
+			}
+		}
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-50 font-sans antialiased">
+<body class="bg-darkbg font-sans antialiased">
 
-<nav class="bg-indigo-600 text-white shadow-md">
+<nav class="bg-darkbg border-b-2 border-gray-100 text-white shadow-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
-            <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-film text-2xl text-indigo-200"></i>
-                <span class="font-bold text-xl tracking-wider text-white">Cinema Admin Panel</span>
-            </div>
-            <div class="text-sm bg-indigo-700 px-3 py-1 rounded-full text-indigo-100">
+			<a href="index.html" class="flex items-center space-x-2">
+				<span class="text-2xl font-bold tracking-wider mono"><span class="text-brand">Q</span>uickShow</span>
+			</a>
+			<span class="font-bold text-l tracking-wider text-white">Cinema Admin Panel</span>
+            <div class="text-sm bg-white/25 px-3 py-1 rounded-full text-indigo-100">
                 Order Module
             </div>
         </div>
@@ -29,38 +43,38 @@
 
         <div class="space-y-6 lg:col-span-1">
 
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fa-solid fa-plus-circle text-indigo-500 mr-2"></i> Create New Order
+            <div class="bg-cardbg rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 class="text-lg text-white font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa-solid fa-plus-circle text-brand mr-2"></i> Create New Order
                 </h2>
                 <form id="createOrderForm" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Customer ID</label>
+                        <label class="block text-sm text-white font-medium text-gray-700 mb-1">Customer ID</label>
                         <input type="number" id="customerId" required min="1"
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                                placeholder="e.g., 1">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Total Amount ($)</label>
+                        <label class="block text-sm text-white font-medium text-gray-700 mb-1">Total Amount ($)</label>
                         <input type="number" id="totalAmount" required min="0.01" step="0.01"
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                                placeholder="0.00">
                     </div>
                     <button type="submit"
-                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg text-sm transition-colors duration-200 flex items-center justify-center space-x-2 shadow-sm">
+                            class="w-full bg-brand hover:bg-brandLight text-white font-medium py-2 rounded-lg text-sm transition-colors duration-200 flex items-center justify-center space-x-2 shadow-sm">
                         <i class="fa-solid fa-receipt"></i>
                         <span>Place Order</span>
                     </button>
                 </form>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fa-solid fa-filter text-gray-500 mr-2"></i> Filter Orders
+            <div class="bg-cardbg rounded-xl shadow-sm border border-gray-100 p-6">
+                <h2 class="text-lg text-white font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa-solid fa-filter text-brand mr-2"></i> Filter Orders
                 </h2>
                 <div class="space-y-3">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Search by Customer ID</label>
+                        <label class="block text-sm text-white font-medium text-gray-700 mb-1">Search by Customer ID</label>
                         <div class="flex space-x-2">
                             <input type="number" id="filterCustomerId"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
@@ -72,7 +86,7 @@
                         </div>
                     </div>
                     <button onclick="loadAllOrders()"
-                            class="w-full border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium py-2 rounded-lg text-xs transition-colors duration-200 text-center block">
+                            class="w-full text-white bg-brand hover:bg-brandLight font-medium py-2 rounded-lg text-xs transition-colors duration-200 text-center block">
                         Clear Filter / Refresh List
                     </button>
                 </div>
@@ -81,18 +95,18 @@
         </div>
 
         <div class="lg:col-span-2">
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                    <h2 class="text-lg font-semibold text-gray-800 flex items-center">
-                        <i class="fa-solid fa-list-check text-indigo-500 mr-2"></i> Live Order Registry
+            <div class="bg-cardbg rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-cardbg">
+                    <h2 class="text-lg text-white font-semibold text-gray-800 flex items-center">
+                        <i class="fa-solid fa-list-check text-brand mr-2"></i> Live Order Registry
                     </h2>
-                    <span id="orderCountBadge" class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">0 Orders</span>
+                    <span id="orderCountBadge" class="bg-white/25 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">0 Orders</span>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                        <tr class="bg-gray-100 text-gray-600 uppercase text-xs tracking-wider border-b border-gray-200">
+                        <tr class="bg-brand/75 text-white uppercase text-xs tracking-wider border-b border-gray-200">
                             <th class="py-3 px-6 font-semibold">Order ID</th>
                             <th class="py-3 px-6 font-semibold">Customer</th>
                             <th class="py-3 px-6 font-semibold">Date & Time</th>
@@ -101,10 +115,10 @@
                             <th class="py-3 px-6 font-semibold text-center">Actions</th>
                         </tr>
                         </thead>
-                        <tbody id="ordersTableBody" class="text-gray-700 text-sm divide-y divide-gray-100">
+                        <tbody id="ordersTableBody" class="text-white text-sm divide-y divide-gray-100">
                         <tr>
-                            <td colspan="6" class="text-center py-8 text-gray-400">
-                                <i class="fa-solid fa-spinner animate-spin text-2xl mb-2 text-gray-300 block"></i>
+                            <td colspan="6" class="text-center py-8 text-white">
+                                <i class="fa-solid fa-spinner animate-spin text-2xl mb-2 text-white block"></i>
                                 Loading orders dataset...
                             </td>
                         </tr>
@@ -232,7 +246,7 @@
         if (ordersList.length === 0) {
             tableBody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="text-center py-8 text-gray-400 font-medium">
+                        <td colspan="6" class="text-center py-8 text-white font-medium">
                             <i class="fa-regular fa-folder-open text-xl mb-1 block"></i> No order variables matching queries inside entity database.
                         </td>
                     </tr>`;
@@ -255,17 +269,17 @@
 
             return `
                     <tr class="hover:bg-gray-50/70 transition-colors">
-                        <td class="py-4 px-6 font-semibold text-gray-900">#${order.id}</td>
+                        <td class="py-4 px-6 font-semibold text-white">#${order.id}</td>
                         <td class="py-4 px-6">
                             <div class="flex items-center space-x-2">
-                                <div class="bg-indigo-50 text-indigo-600 h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold">
+                                <div class="bg-brand text-white h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold">
                                     C
                                 </div>
-                                <span class="font-medium text-gray-800">ID: ${order.customer ? order.customer.id : 'Anon'}</span>
+                                <span class="font-medium text-white">ID: ${order.customer ? order.customer.id : 'Anon'}</span>
                             </div>
                         </td>
-                        <td class="py-4 px-6 text-gray-500 text-xs">${dateStr}</td>
-                        <td class="py-4 px-6 font-bold text-indigo-600">$${order.totalAmount.toFixed(2)}</td>
+                        <td class="py-4 px-6 text-white text-xs">${dateStr}</td>
+                        <td class="py-4 px-6 font-bold text-white">$${order.totalAmount.toFixed(2)}</td>
                         <td class="py-4 px-6">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass}">
                                 ${order.status}
@@ -295,10 +309,10 @@
     function showErrorRow(msg) {
         document.getElementById('ordersTableBody').innerHTML = `
                 <tr>
-                    <td colspan="6" class="text-center py-8 text-rose-500 font-medium bg-rose-50/50">
-                        <i class="fa-solid fa-triangle-exclamation text-xl mb-1 block"></i>
+                    <td colspan="6" class="text-center py-8 text-white font-medium bg-cardbg">
+                        <i class="fa-solid fa-triangle-exclamation text-xl text-white mb-1 block"></i>
                         Could not synchronize table views: ${msg} <br>
-                        <span class="text-xs text-gray-400 font-normal">Confirm local Spring Boot backend application engine context is listening on port 8080.</span>
+                        <span class="text-xs text-white font-normal">Confirm local Spring Boot backend application engine context is listening on port 8080.</span>
                     </td>
                 </tr>`;
     }
